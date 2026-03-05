@@ -1,0 +1,50 @@
+@model User
+@{
+    ViewData["Title"] = "Add New User";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-person-plus me-2"></i>Register New Customer</h2>
+    <p>Fill in the customer details below to create a new account</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-section">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Username" class="form-label">Username <span class="text-danger">*</span></label>
+                        <input asp-for="Username" class="form-control" maxlength="30" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label">Password <span class="text-danger">*</span></label>
+                        <input asp-for="Password" type="password" class="form-control" maxlength="30" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input asp-for="FullName" class="form-control" maxlength="50" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <input asp-for="Email" type="email" class="form-control" maxlength="50" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label">Phone</label>
+                        <input asp-for="Phone" class="form-control" maxlength="15" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Address" class="form-label">Address</label>
+                        <input asp-for="Address" class="form-control" maxlength="50" />
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back to List</a>
+                    <button type="submit" class="btn btn-kumari"><i class="bi bi-check-circle me-2"></i>Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

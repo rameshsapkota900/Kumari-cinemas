@@ -1,0 +1,98 @@
+@model OccupancyViewModel
+@{
+    ViewData["Title"] = "Theater Occupancy Analytics";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-bar-chart me-2"></i>Theater Occupancy Analytics</h2>
+    <p>Top 3 theaters by seat occupancy for a selected movie (paid tickets only)</p>
+</div>
+
+<!-- Movie Selection -->
+<div class="filter-section mb-4">
+    <form method="get" class="row align-items-end g-3">
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="bi bi-film me-1"></i>Select Movie</label>
+            <select name="movieId" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Select a Movie to view Top 3 Theaters --</option>
+                @foreach (var m in Model.AllMovies)
+                {
+                    <option value="@m.MovieID" selected="@(Model.SelectedMovieId == m.MovieID ? "selected" : null)">
+                        @m.Title (@m.Genre, @m.Language)
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-kumari w-100"><i class="bi bi-search me-2"></i>Analyze</button>
+        </div>
+        <div class="col-md-3">
+            <a asp-action="Index" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle me-2"></i>Clear</a>
+        </div>
+    </form>
+</div>
+
+@if (Model.SelectedMovieId.HasValue && Model.SelectedMovie != null)
+{
+    <!-- Movie Info -->
+    <div class="card mb-4" style="border-left: 4px solid #e50914;">
+        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-film me-2"></i>Selected Movie</h5></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3"><strong>Title:</strong> @Model.SelectedMovie.Title</div>
+                <div class="col-md-2"><strong>Genre:</strong> <span class="badge bg-info">@Model.SelectedMovie.Genre</span></div>
+                <div class="col-md-2"><strong>Language:</strong> @Model.SelectedMovie.Language</div>
+                <div class="col-md-3"><strong>Analysis:</strong> <span class="badge bg-danger">Top 3 Theaters by Occupancy %</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Occupancy Results -->
+    <div class="card">
+        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Top 3 Theater/Hall Occupancy (Paid Tickets Only)</h5></div>
+        <div class="card-body">
+            @if (Model.TopTheaters.Any())
+            {
+                int rank = 1;
+                @foreach (var r in Model.TopTheaters)
+                {
+                    <div class="occupancy-bar mb-4 p-3 rounded" style="background: #f8f9fa; border-left: 4px solid @(rank == 1 ? "#ffd700" : rank == 2 ? "#c0c0c0" : "#cd7f32");">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="badge @(rank == 1 ? "bg-warning text-dark" : rank == 2 ? "bg-secondary" : "bg-dark") me-2">
+                                    #@rank @(rank == 1 ? "GOLD" : rank == 2 ? "SILVER" : "BRONZE")
+                                </span>
+                                <strong>@r.TheaterName</strong> — @r.HallName
+                                <span class="text-muted ms-2"><i class="bi bi-geo-alt"></i> @r.City</span>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary fs-6">@r.OccupancyPercentage%</span>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar @(r.OccupancyPercentage >= 80 ? "bg-success" : r.OccupancyPercentage >= 50 ? "bg-info" : "bg-warning")"
+                                 role="progressbar"
+                                 style="width: @r.OccupancyPercentage%"
+                                 aria-valuenow="@r.OccupancyPercentage"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                @r.PaidTickets / @r.Capacity seats
+                            </div>
+                        </div>
+                        <div class="text-muted small mt-1">
+                            Capacity: @r.Capacity seats | Paid Tickets: @r.PaidTickets | Occupancy: @r.OccupancyPercentage%
+                        </div>
+                    </div>
+                    rank++;
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">No occupancy data found for this movie (no paid bookings).</p>
+                </div>
+            }
+        </div>
+    </div>
+}

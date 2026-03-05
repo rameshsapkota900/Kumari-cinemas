@@ -1,0 +1,68 @@
+﻿@model Ticket
+@{
+    ViewData["Title"] = "Edit Ticket";
+    var ticketPrices = ViewBag.TicketPrices as List<TicketPrice> ?? new List<TicketPrice>();
+    var seats = ViewBag.Seats as List<Seat> ?? new List<Seat>();
+    var cancellations = ViewBag.Cancellations as List<Cancellation> ?? new List<Cancellation>();
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-pencil-square me-2"></i>Edit Ticket #@Model.TicketID</h2>
+    <p>Update ticket details, pricing, and seat assignment</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-section">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="TicketID" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Ticket ID</label>
+                        <input value="@Model.TicketID" class="form-control" disabled />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="IssueDate" class="form-label">Issue Date <span class="text-danger">*</span></label>
+                        <input asp-for="IssueDate" type="date" class="form-control" value="@Model.IssueDate.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="TicketPriceID" class="form-label">Ticket Price <span class="text-danger">*</span></label>
+                        <select asp-for="TicketPriceID" class="form-select" required>
+                            <option value="">-- Select Price --</option>
+                            @foreach (var tp in ticketPrices)
+                            {
+                                <option value="@tp.TicketPriceID">Rs. @tp.Price.ToString("F2") — @tp.Category</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="SeatID" class="form-label">Assign Seat <span class="text-danger">*</span></label>
+                        <select asp-for="SeatID" class="form-select" required>
+                            <option value="">-- Select Seat --</option>
+                            @foreach (var s in seats)
+                            {
+                                <option value="@s.SeatID">@s.SeatNumber — @s.Status</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CancellationID" class="form-label">Cancellation <span class="text-muted">- Optional</span></label>
+                        <select asp-for="CancellationID" class="form-select">
+                            <option value="">-- No Cancellation --</option>
+                            @foreach (var c in cancellations)
+                            {
+                                <option value="@c.CancellationID">@(c.CancelDate?.ToString("yyyy-MM-dd") ?? "-") — @c.Reason</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
+                    <button type="submit" class="btn btn-kumari"><i class="bi bi-save me-2"></i>Update Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

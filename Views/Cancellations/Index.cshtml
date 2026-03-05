@@ -1,0 +1,57 @@
+@model List<Cancellation>
+@{
+    ViewData["Title"] = "Cancellations";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-x-circle me-2"></i>Cancellations</h2>
+    <p>Manage ticket cancellation records</p>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Cancellations</h5>
+        <a asp-action="Create" class="btn btn-kumari btn-sm"><i class="bi bi-plus-circle me-1"></i>New Cancellation</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-kumari table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Reason</th>
+                        <th>Cancellation Date</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td><strong>@c.CancellationID</strong></td>
+                                <td>@(c.Reason ?? "<em class='text-muted'>No reason provided</em>")</td>
+                                <td>@(c.CancelDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@c.CancellationID" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@c.CancellationID" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                                <p class="mt-2 mb-0">No cancellations recorded yet</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-muted small">Total Cancellations: <strong>@Model.Count</strong></div>
+</div>

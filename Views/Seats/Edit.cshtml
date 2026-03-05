@@ -1,0 +1,51 @@
+@model Seat
+@{
+    ViewData["Title"] = "Edit Seat";
+    var halls = ViewBag.Halls as List<Hall> ?? new List<Hall>();
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-pencil-square me-2"></i>Edit Seat #@Model.SeatID</h2>
+    <p>Update seat details and status</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-section">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="SeatID" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="SeatNumber" class="form-label">Seat Number <span class="text-danger">*</span></label>
+                        <input asp-for="SeatNumber" class="form-control" maxlength="10" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="HallID" class="form-label">Screening Hall <span class="text-danger">*</span></label>
+                        <select asp-for="HallID" class="form-select" required>
+                            <option value="">-- Select Hall --</option>
+                            @foreach (var h in halls)
+                            {
+                                <option value="@h.HallID">@h.HallName — @h.TheaterName (@h.TheaterCity)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label">Status <span class="text-danger">*</span></label>
+                        <select asp-for="Status" class="form-select" required>
+                            <option value="Available">Available</option>
+                            <option value="Occupied">Occupied</option>
+                            <option value="Reserved">Reserved</option>
+                            <option value="Maintenance">Maintenance</option>
+                        </select>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
+                    <button type="submit" class="btn btn-kumari"><i class="bi bi-save me-2"></i>Update Seat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+@model Movie
+@{
+    ViewData["Title"] = "Delete Movie";
+}
+<div class="page-header">
+    <h2><i class="bi bi-trash me-2"></i>Remove Movie</h2>
+    <p>Confirm removal of this movie from the catalogue</p>
+</div>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="delete-confirm text-center">
+            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">Delete Movie "@Model.Title"?</h4>
+            <p class="text-muted">Genre: @Model.Genre | Duration: @Model.Duration min | Language: @Model.Language | Released: @Model.ReleaseDate.ToString("yyyy-MM-dd")</p>
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.MovieID" />
+                <a asp-action="Index" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left me-2"></i>Cancel</a>
+                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-2"></i>Confirm Delete</button>
+            </form>
+        </div>
+    </div>
+</div>

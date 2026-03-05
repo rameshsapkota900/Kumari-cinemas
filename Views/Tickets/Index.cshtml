@@ -1,0 +1,71 @@
+﻿@model List<Ticket>
+@{
+    ViewData["Title"] = "Ticket Details";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-ticket-perforated me-2"></i>Tickets</h2>
+    <p>Manage all issued tickets, pricing, seat assignments, and cancellations</p>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Tickets</h5>
+        <a asp-action="Create" class="btn btn-kumari btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Ticket</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-kumari table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>TicketID</th>
+                        <th>Issue Date</th>
+                        <th>Price</th>
+                        <th>Category</th>
+                        <th>Seat</th>
+                        <th>Seat Status</th>
+                        <th>Cancellation</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td><strong>@t.TicketID</strong></td>
+                            <td>@t.IssueDate.ToString("yyyy-MM-dd")</td>
+                            <td>@(t.Price > 0 ? $"Rs. {t.Price:F2}" : "-")</td>
+                            <td><span class="badge bg-info">@t.Category</span></td>
+                            <td>@t.SeatNumber</td>
+                            <td>
+                                @if (t.SeatStatus == "Available")
+                                {
+                                    <span class="badge bg-success">@t.SeatStatus</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@t.SeatStatus</span>
+                                }
+                            </td>
+                            <td>
+                                @if (t.CancellationID.HasValue && t.CancellationID > 0)
+                                {
+                                    <span class="badge bg-danger">Cancelled</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">None</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@t.TicketID" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="Delete" asp-route-id="@t.TicketID" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-muted small">Total Tickets: <strong>@Model.Count</strong></div>
+</div>

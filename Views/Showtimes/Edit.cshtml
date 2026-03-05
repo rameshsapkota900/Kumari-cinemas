@@ -1,0 +1,71 @@
+@model Show
+@{
+    ViewData["Title"] = "Edit Show";
+    var movies = ViewBag.Movies as List<Movie> ?? new List<Movie>();
+    var halls = ViewBag.Halls as List<Hall> ?? new List<Hall>();
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-pencil-square me-2"></i>Edit Show Schedule</h2>
+    <p>Update the screening details for this show</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-section">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ShowID" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Show ID</label>
+                        <input value="@Model.ShowID" class="form-control" disabled />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ShowDate" class="form-label">Show Date <span class="text-danger">*</span></label>
+                        <input asp-for="ShowDate" type="date" class="form-control" value="@Model.ShowDate.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ShowTime" class="form-label">Show Time <span class="text-danger">*</span></label>
+                        <input asp-for="ShowTime" class="form-control" maxlength="10" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ShowStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                        <select asp-for="ShowStatus" class="form-select" required>
+                            <option value="">-- Select --</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="Active">Active</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="MovieID" class="form-label">Movie (Foreign Key) <span class="text-danger">*</span></label>
+                        <select asp-for="MovieID" class="form-select" required>
+                            <option value="">-- Select Movie --</option>
+                            @foreach (var m in movies)
+                            {
+                                <option value="@m.MovieID">@m.MovieID — @m.Title (@m.Genre)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="HallID" class="form-label">Hall (Foreign Key) <span class="text-danger">*</span></label>
+                        <select asp-for="HallID" class="form-select" required>
+                            <option value="">-- Select Hall --</option>
+                            @foreach (var h in halls)
+                            {
+                                <option value="@h.HallID">@h.HallID — @h.HallName (@h.TheaterName, Cap: @h.Capacity)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
+                    <button type="submit" class="btn btn-kumari"><i class="bi bi-save me-2"></i>Update Show</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+@model List<Movie>
+@{
+    ViewData["Title"] = "Movie Details";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-film me-2"></i>Movie Catalogue</h2>
+    <p>Manage the cinema movie library, screenings, and upcoming releases</p>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Movies</h5>
+        <a asp-action="Create" class="btn btn-kumari btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Movie</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-kumari table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>MovieID</th>
+                        <th>Title</th>
+                        <th>Duration (min)</th>
+                        <th>Language</th>
+                        <th>Genre</th>
+                        <th>Release Date</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model)
+                    {
+                        <tr>
+                            <td><strong>@m.MovieID</strong></td>
+                            <td>@m.Title</td>
+                            <td><span class="badge bg-secondary">@m.Duration min</span></td>
+                            <td>@m.Language</td>
+                            <td><span class="badge bg-info">@m.Genre</span></td>
+                            <td>@m.ReleaseDate.ToString("yyyy-MM-dd")</td>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@m.MovieID" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="Delete" asp-route-id="@m.MovieID" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-muted small">Total Movies: <strong>@Model.Count</strong></div>
+</div>

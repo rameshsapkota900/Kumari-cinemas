@@ -1,0 +1,23 @@
+@model Hall
+@{
+    ViewData["Title"] = "Delete Hall";
+}
+<div class="page-header">
+    <h2><i class="bi bi-trash me-2"></i>Delete Hall — @Model.HallName</h2>
+    <p>Remove this screening hall from the system</p>
+</div>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="delete-confirm text-center">
+            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">Delete Hall "@Model.HallName"?</h4>
+            <p class="text-muted">Capacity: @Model.Capacity seats | Theater: @Model.TheaterName</p>
+            <form asp-action="DeleteHall" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.HallID" />
+                <a asp-action="Index" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left me-2"></i>Cancel</a>
+                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-2"></i>Confirm Delete</button>
+            </form>
+        </div>
+    </div>
+</div>

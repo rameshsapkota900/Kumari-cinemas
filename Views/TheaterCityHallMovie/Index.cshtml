@@ -1,0 +1,104 @@
+@model TheaterCityHallMovieViewModel
+@{
+    ViewData["Title"] = "Hall Schedule";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-collection-play me-2"></i>Hall Movie Schedule</h2>
+    <p>View movies and showtimes scheduled for any screening hall</p>
+</div>
+
+<!-- Hall Selection -->
+<div class="filter-section mb-4">
+    <form method="get" class="row align-items-end g-3">
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="bi bi-door-open me-1"></i>Select Hall</label>
+            <select name="hallId" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Select a Hall to view Movies & Showtimes --</option>
+                @foreach (var h in Model.AllHalls)
+                {
+                    <option value="@h.HallID" selected="@(Model.SelectedHallId == h.HallID ? "selected" : null)">
+                        @h.HallName — @h.TheaterName, @h.TheaterCity (Capacity: @h.Capacity)
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-kumari w-100"><i class="bi bi-search me-2"></i>Load Movies</button>
+        </div>
+        <div class="col-md-3">
+            <a asp-action="Index" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle me-2"></i>Clear</a>
+        </div>
+    </form>
+</div>
+
+@if (Model.SelectedHallId.HasValue && Model.TheaterCityHallInfo != null)
+{
+    <!-- Theater/Hall Info -->
+    <div class="card mb-4" style="border-left: 4px solid #e50914;">
+        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-building me-2"></i>Theater & Hall Information</h5></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3"><strong>Theater:</strong> @Model.TheaterCityHallInfo.TheaterName</div>
+                <div class="col-md-2"><strong>City:</strong> <i class="bi bi-geo-alt"></i> @Model.TheaterCityHallInfo.City</div>
+                <div class="col-md-3"><strong>Address:</strong> @Model.TheaterCityHallInfo.Address</div>
+                <div class="col-md-2"><strong>Hall:</strong> @Model.TheaterCityHallInfo.HallName</div>
+                <div class="col-md-2"><strong>Capacity:</strong> <span class="badge bg-info">@Model.TheaterCityHallInfo.Capacity seats</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movies + Showtimes -->
+    <div class="card">
+        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-film me-2"></i>Movies & Showtimes</h5></div>
+        <div class="card-body p-0">
+            @if (Model.MovieShows.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-kumari table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ShowID</th>
+                                <th>Movie Title</th>
+                                <th>Genre</th>
+                                <th>Language</th>
+                                <th>Duration</th>
+                                <th>Release Date</th>
+                                <th>Show Date</th>
+                                <th>Show Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model.MovieShows)
+                            {
+                                <tr>
+                                    <td><strong>@r.ShowID</strong></td>
+                                    <td><strong>@r.Title</strong></td>
+                                    <td><span class="badge bg-info">@r.Genre</span></td>
+                                    <td>@r.Language</td>
+                                    <td>@r.Duration min</td>
+                                    <td>@r.ReleaseDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@r.ShowDate.ToString("yyyy-MM-dd")</td>
+                                    <td><span class="badge bg-secondary">@r.ShowTime</span></td>
+                                    <td>
+                                        @if (r.ShowStatus == "Active" || r.ShowStatus == "Scheduled") { <span class="badge bg-success">@r.ShowStatus</span> }
+                                        else { <span class="badge bg-warning text-dark">@r.ShowStatus</span> }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">No movies scheduled for this hall.</p>
+                </div>
+            }
+        </div>
+        <div class="card-footer bg-white text-muted small">Total Shows: <strong>@Model.MovieShows.Count</strong></div>
+    </div>
+}

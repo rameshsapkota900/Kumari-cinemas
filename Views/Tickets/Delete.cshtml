@@ -1,0 +1,24 @@
+@model Ticket
+@{
+    ViewData["Title"] = "Delete Ticket";
+}
+<div class="page-header">
+    <h2><i class="bi bi-trash me-2"></i>Delete Ticket #@Model.TicketID</h2>
+    <p>Remove this ticket from the system</p>
+</div>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="delete-confirm text-center">
+            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">Delete Ticket #@Model.TicketID?</h4>
+            <p class="text-muted">Issued: @Model.IssueDate.ToString("yyyy-MM-dd")</p>
+            <p class="text-muted">Price: Rs. @(Model.Price?.ToString("F2") ?? "-") | Seat: @Model.SeatNumber | Cancelled: @(Model.CancellationID.HasValue ? "Yes" : "No")</p>
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.TicketID" />
+                <a asp-action="Index" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left me-2"></i>Cancel</a>
+                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-2"></i>Confirm Delete</button>
+            </form>
+        </div>
+    </div>
+</div>

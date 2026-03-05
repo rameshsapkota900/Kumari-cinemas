@@ -1,0 +1,89 @@
+@model TheaterCityHallViewModel
+@{
+    ViewData["Title"] = "TheaterCityHall Details";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-building me-2"></i>Theaters & Halls</h2>
+    <p>Manage theaters and screening halls across all locations</p>
+</div>
+
+<!-- THEATERS Section -->
+<div class="card mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-building me-2"></i>Theaters</h5>
+        <a asp-action="CreateTheater" class="btn btn-kumari btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Theater</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-kumari table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>TheaterID</th>
+                        <th>Name</th>
+                        <th>City</th>
+                        <th>Address</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model.Theaters)
+                    {
+                        <tr>
+                            <td><strong>@t.TheaterID</strong></td>
+                            <td>@t.Name</td>
+                            <td><i class="bi bi-geo-alt me-1"></i>@t.City</td>
+                            <td>@t.Address</td>
+                            <td class="text-center">
+                                <a asp-action="EditTheater" asp-route-id="@t.TheaterID" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="DeleteTheater" asp-route-id="@t.TheaterID" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-muted small">Total Theaters: <strong>@Model.Theaters.Count</strong></div>
+</div>
+
+<!-- HALLS Section -->
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-door-open me-2"></i>Screening Halls</h5>
+        <a asp-action="CreateHall" class="btn btn-kumari btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Hall</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-kumari table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>HallID</th>
+                        <th>Hall Name</th>
+                        <th>Capacity</th>
+                        <th>Theater</th>
+                        <th>City</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var h in Model.Halls)
+                    {
+                        <tr>
+                            <td><strong>@h.HallID</strong></td>
+                            <td>@h.HallName</td>
+                            <td><span class="badge bg-info">@h.Capacity seats</span></td>
+                            <td>@h.TheaterName</td>
+                            <td><i class="bi bi-geo-alt me-1"></i>@h.TheaterCity</td>
+                            <td class="text-center">
+                                <a asp-action="EditHall" asp-route-id="@h.HallID" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="DeleteHall" asp-route-id="@h.HallID" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-muted small">Total Halls: <strong>@Model.Halls.Count</strong></div>
+</div>

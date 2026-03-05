@@ -1,0 +1,66 @@
+@model List<User>
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="bi bi-people me-2"></i>Registered Customers</h2>
+        <p>Manage customer accounts, registrations, and contact information</p>
+    </div>
+    <a asp-action="Create" class="btn btn-kumari"><i class="bi bi-plus-circle me-2"></i>Add New User</a>
+</div>
+
+<!-- List View -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-kumari table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>UserID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Registration Date</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var u in Model)
+                        {
+                            <tr>
+                                <td><strong>@u.UserID</strong></td>
+                                <td>@u.Username</td>
+                                <td>@u.FullName</td>
+                                <td><i class="bi bi-envelope me-1"></i>@u.Email</td>
+                                <td><i class="bi bi-telephone me-1"></i>@u.Phone</td>
+                                <td>@u.Address</td>
+                                <td>@u.RegistrationDate.ToString("yyyy-MM-dd")</td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@u.UserID" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@u.UserID" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="8" class="text-center py-4 text-muted">No users found in the database.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-muted small">
+        Total Customers: <strong>@Model.Count</strong>
+    </div>
+</div>

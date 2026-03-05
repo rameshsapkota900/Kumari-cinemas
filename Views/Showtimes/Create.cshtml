@@ -1,0 +1,66 @@
+@model Show
+@{
+    ViewData["Title"] = "Add New Show";
+    var movies = ViewBag.Movies as List<Movie> ?? new List<Movie>();
+    var halls = ViewBag.Halls as List<Hall> ?? new List<Hall>();
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-clock me-2"></i>Schedule New Show</h2>
+    <p>Set up a new movie screening with date, time, and hall assignment</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-section">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="ShowDate" class="form-label">Show Date <span class="text-danger">*</span></label>
+                        <input asp-for="ShowDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ShowTime" class="form-label">Show Time <span class="text-danger">*</span></label>
+                        <input asp-for="ShowTime" class="form-control" placeholder="e.g. 18:30" maxlength="10" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ShowStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                        <select asp-for="ShowStatus" class="form-select" required>
+                            <option value="">-- Select --</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="Active">Active</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="MovieID" class="form-label">Select Movie <span class="text-danger">*</span></label>
+                        <select asp-for="MovieID" class="form-select" required>
+                            <option value="">-- Choose a Movie --</option>
+                            @foreach (var m in movies)
+                            {
+                                <option value="@m.MovieID">@m.Title (@m.Genre, @m.Language)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="HallID" class="form-label">Select Hall <span class="text-danger">*</span></label>
+                        <select asp-for="HallID" class="form-select" required>
+                            <option value="">-- Choose a Hall --</option>
+                            @foreach (var h in halls)
+                            {
+                                <option value="@h.HallID">@h.HallName (@h.TheaterName, @h.Capacity seats)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
+                    <button type="submit" class="btn btn-kumari"><i class="bi bi-check-circle me-2"></i>Create Show</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

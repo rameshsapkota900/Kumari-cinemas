@@ -1,0 +1,266 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- Page Header -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="bi bi-speedometer2 me-2"></i>KumariCinemas Dashboard</h2>
+        <p>Welcome to the KumariCinemas Management System — Real-time overview of cinema operations</p>
+    </div>
+    <div>
+        <span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1 small"></i>Live</span>
+    </div>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Notice:</strong> @ViewBag.Error
+        <br /><small>Please contact your system administrator if this issue persists.</small>
+    </div>
+}
+
+<!-- Statistics Cards Row 1 -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card movies position-relative">
+            <div class="card-body">
+                <i class="bi bi-camera-reels stat-icon"></i>
+                <div class="stat-label">Total Movies</div>
+                <div class="stat-value">@Model.TotalMovies</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card theaters position-relative">
+            <div class="card-body">
+                <i class="bi bi-building stat-icon"></i>
+                <div class="stat-label">Total Theaters</div>
+                <div class="stat-value">@Model.TotalTheaters</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card halls position-relative">
+            <div class="card-body">
+                <i class="bi bi-door-open stat-icon"></i>
+                <div class="stat-label">Total Halls</div>
+                <div class="stat-value">@Model.TotalHalls</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card shows position-relative">
+            <div class="card-body">
+                <i class="bi bi-clock stat-icon"></i>
+                <div class="stat-label">Total Shows</div>
+                <div class="stat-value">@Model.TotalShows</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards Row 2 -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card users position-relative">
+            <div class="card-body">
+                <i class="bi bi-people stat-icon"></i>
+                <div class="stat-label">Registered Users</div>
+                <div class="stat-value">@Model.TotalUsers</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card bookings position-relative">
+            <div class="card-body">
+                <i class="bi bi-journal-check stat-icon"></i>
+                <div class="stat-label">Total Bookings</div>
+                <div class="stat-value">@Model.TotalBookings</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card tickets position-relative">
+            <div class="card-body">
+                <i class="bi bi-ticket-perforated stat-icon"></i>
+                <div class="stat-label">Total Tickets</div>
+                <div class="stat-value">@Model.TotalTickets</div>
+                <small class="text-success">@Model.PaidTickets Active</small> |
+                <small class="text-danger">@Model.CancelledTickets Cancelled</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card revenue position-relative">
+            <div class="card-body">
+                <i class="bi bi-currency-dollar stat-icon"></i>
+                <div class="stat-label">Total Revenue (Paid)</div>
+                <div class="stat-value">Rs. @Model.TotalRevenue.ToString("N2")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Genre Distribution Pie Chart -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Movie Genre Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="genreChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bookings per Theater Bar Chart -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Bookings per Theater</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="theaterChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Monthly Revenue Line Chart -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Monthly Revenue</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Navigation -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0"><i class="bi bi-grid me-2"></i>Quick Navigation — Options Menu</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a asp-controller="Users" asp-action="Index" class="btn btn-outline-primary w-100 py-3">
+                            <i class="bi bi-people d-block fs-3 mb-1"></i>Users
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a asp-controller="TheaterCityHall" asp-action="Index" class="btn btn-outline-info w-100 py-3">
+                            <i class="bi bi-building d-block fs-3 mb-1"></i>Theaters & Halls
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a asp-controller="Movies" asp-action="Index" class="btn btn-outline-danger w-100 py-3">
+                            <i class="bi bi-camera-reels d-block fs-3 mb-1"></i>Movies
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a asp-controller="Showtimes" asp-action="Index" class="btn btn-outline-warning w-100 py-3">
+                            <i class="bi bi-clock d-block fs-3 mb-1"></i>Showtimes
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a asp-controller="Tickets" asp-action="Index" class="btn btn-outline-success w-100 py-3">
+                            <i class="bi bi-ticket-perforated d-block fs-3 mb-1"></i>Tickets
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a asp-controller="UserTicket" asp-action="Index" class="btn btn-outline-secondary w-100 py-3">
+                            <i class="bi bi-person-badge d-block fs-3 mb-1"></i>User Ticket
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // --- Genre Distribution Pie Chart ---
+    const genreCtx = document.getElementById('genreChart').getContext('2d');
+    new Chart(genreCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GenreLabels)),
+            datasets: [{
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GenreCounts)),
+                backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { font: { family: 'Poppins' } } } }
+        }
+    });
+
+    // --- Bookings per Theater Bar Chart ---
+    const theaterCtx = document.getElementById('theaterChart').getContext('2d');
+    new Chart(theaterCtx, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TheaterLabels)),
+            datasets: [{
+                label: 'Bookings',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TheaterBookingCounts)),
+                backgroundColor: 'rgba(15, 52, 96, 0.7)',
+                borderColor: '#0f3460',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+
+    // --- Monthly Revenue Line Chart ---
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthLabels)),
+            datasets: [{
+                label: 'Revenue (Rs.)',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue)),
+                borderColor: '#27ae60',
+                backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#27ae60'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+</script>
+}

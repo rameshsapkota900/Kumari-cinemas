@@ -1,0 +1,26 @@
+@model Cancellation
+@{
+    ViewData["Title"] = "Delete Cancellation";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-trash me-2"></i>Delete Cancellation #@Model.CancellationID</h2>
+    <p>Remove this cancellation record</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="delete-confirm text-center">
+            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">Delete Cancellation #@Model.CancellationID?</h4>
+            <p class="text-muted">Reason: @(Model.Reason ?? "N/A") | Date: @(Model.CancelDate?.ToString("yyyy-MM-dd") ?? "N/A")</p>
+            <p class="text-warning small"><i class="bi bi-info-circle me-1"></i>This will fail if tickets reference this cancellation.</p>
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.CancellationID" />
+                <a asp-action="Index" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left me-2"></i>Cancel</a>
+                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-2"></i>Confirm Delete</button>
+            </form>
+        </div>
+    </div>
+</div>

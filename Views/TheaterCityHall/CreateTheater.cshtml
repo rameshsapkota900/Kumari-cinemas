@@ -1,0 +1,38 @@
+@model Theater
+@{
+    ViewData["Title"] = "Add New Theater";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-building me-2"></i>Add New Theater</h2>
+    <p>Register a new theater location in the system</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-section">
+            <form asp-action="CreateTheater" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Name" class="form-label">Theater Name <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="form-control" maxlength="30" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="City" class="form-label">City <span class="text-danger">*</span></label>
+                        <input asp-for="City" class="form-control" maxlength="20" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Address" class="form-label">Address <span class="text-danger">*</span></label>
+                        <input asp-for="Address" class="form-control" maxlength="50" required />
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
+                    <button type="submit" class="btn btn-kumari"><i class="bi bi-check-circle me-2"></i>Create Theater</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

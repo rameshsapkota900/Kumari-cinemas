@@ -1,0 +1,61 @@
+@model List<Seat>
+@{
+    ViewData["Title"] = "Seats";
+    var hallLookup = ViewBag.HallLookup as Dictionary<int, string> ?? new Dictionary<int, string>();
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-grid-3x3-gap me-2"></i>Seats</h2>
+    <p>Manage seating arrangement for all screening halls</p>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Seats</h5>
+        <a asp-action="Create" class="btn btn-kumari btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Seat</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-kumari table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Seat Number</th>
+                        <th>Hall</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td><strong>@s.SeatID</strong></td>
+                            <td><i class="bi bi-grid-3x3-gap me-1"></i>@s.SeatNumber</td>
+                            <td>@(hallLookup.ContainsKey(s.HallID) ? hallLookup[s.HallID] : $"Hall #{s.HallID}")</td>
+                            <td>
+                                @if (s.Status == "Available")
+                                {
+                                    <span class="badge bg-success">@s.Status</span>
+                                }
+                                else if (s.Status == "Occupied")
+                                {
+                                    <span class="badge bg-danger">@s.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@s.Status</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@s.SeatID" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="Delete" asp-route-id="@s.SeatID" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-muted small">Total Seats: <strong>@Model.Count</strong></div>
+</div>

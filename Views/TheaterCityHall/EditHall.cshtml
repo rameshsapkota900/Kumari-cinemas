@@ -1,0 +1,51 @@
+@model Hall
+@{
+    ViewData["Title"] = "Edit Hall";
+    var theaters = ViewBag.Theaters as List<Theater> ?? new List<Theater>();
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-pencil-square me-2"></i>Edit Hall — @Model.HallName</h2>
+    <p>Update hall details and capacity</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-section">
+            <form asp-action="EditHall" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="HallID" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Hall ID</label>
+                        <input value="@Model.HallID" class="form-control" disabled />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="HallName" class="form-label">Hall Name <span class="text-danger">*</span></label>
+                        <input asp-for="HallName" class="form-control" maxlength="30" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Capacity" class="form-label">Capacity <span class="text-danger">*</span></label>
+                        <input asp-for="Capacity" type="number" class="form-control" min="1" required />
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="TheaterID" class="form-label">Select Theater <span class="text-danger">*</span></label>
+                        <select asp-for="TheaterID" class="form-select" required>
+                            <option value="">-- Select Theater --</option>
+                            @foreach (var t in theaters)
+                            {
+                                <option value="@t.TheaterID">@t.Name — @t.City</option>
+                            }
+                        </select>
+                        <small class="text-muted">Choose the theater this hall belongs to</small>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
+                    <button type="submit" class="btn btn-kumari"><i class="bi bi-save me-2"></i>Update Hall</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,108 @@
+@model UserTicketViewModel
+@{
+    ViewData["Title"] = "User Ticket History";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-person-badge me-2"></i>User Ticket History</h2>
+    <p>View ticket purchase history for any registered user (last 6 months)</p>
+</div>
+
+<!-- User Selection -->
+<div class="filter-section mb-4">
+    <form method="get" class="row align-items-end g-3">
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="bi bi-person me-1"></i>Select User</label>
+            <select name="userId" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Select a User to view their Tickets --</option>
+                @foreach (var u in Model.AllUsers)
+                {
+                    <option value="@u.UserID" selected="@(Model.SelectedUserId == u.UserID ? "selected" : null)">
+                        @u.FullName (@u.Username) — @u.Email
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-kumari w-100"><i class="bi bi-search me-2"></i>Load Tickets</button>
+        </div>
+        <div class="col-md-3">
+            <a asp-action="Index" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle me-2"></i>Clear</a>
+        </div>
+    </form>
+</div>
+
+@if (Model.SelectedUserId.HasValue && Model.SelectedUser != null)
+{
+    <!-- User Details Card -->
+    <div class="card mb-4" style="border-left: 4px solid #e50914;">
+        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>User Details</h5></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3"><strong>Username:</strong> @Model.SelectedUser.Username</div>
+                <div class="col-md-3"><strong>Full Name:</strong> @Model.SelectedUser.FullName</div>
+                <div class="col-md-3"><strong>Email:</strong> @Model.SelectedUser.Email</div>
+                <div class="col-md-3"><strong>Phone:</strong> @Model.SelectedUser.Phone</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tickets Table -->
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-ticket-perforated me-2"></i>Tickets Purchased (Last 6 Months)</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Tickets.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-kumari table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>TicketID</th>
+                                <th>Movie</th>
+                                <th>Issue Date</th>
+                                <th>Price (Rs.)</th>
+                                <th>Category</th>
+                                <th>Seat No.</th>
+                                <th>Show Date</th>
+                                <th>Show Time</th>
+                                <th>Booking</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in Model.Tickets)
+                            {
+                                <tr>
+                                    <td><strong>@t.TicketID</strong></td>
+                                    <td>@t.MovieTitle</td>
+                                    <td>@t.IssueDate.ToString("yyyy-MM-dd")</td>
+                                    <td><strong>Rs. @t.Price.ToString("F2")</strong></td>
+                                    <td><span class="badge bg-info">@t.Category</span></td>
+                                    <td>@t.SeatNumber</td>
+                                    <td>@t.ShowDate.ToString("yyyy-MM-dd")</td>
+                                    <td><span class="badge bg-secondary">@t.ShowTime</span></td>
+                                    <td><span class="badge bg-primary">@t.BookingDate.ToString("yyyy-MM-dd")</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold">
+                                <td colspan="3" class="text-end">Total (@Model.Tickets.Count tickets):</td>
+                                <td>Rs. @Model.Tickets.Sum(t => t.Price).ToString("F2")</td>
+                                <td colspan="5"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">No tickets found for this user in the last 6 months.</p>
+                </div>
+            }
+        </div>
+    </div>
+}

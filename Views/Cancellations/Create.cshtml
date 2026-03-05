@@ -1,0 +1,43 @@
+@model Cancellation
+@{
+    ViewData["Title"] = "Record Cancellation";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-x-circle me-2"></i>Record Cancellation</h2>
+    <p>Create a new cancellation record for a ticket</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-section">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Reason" class="form-label">Reason</label>
+                        <select asp-for="Reason" class="form-select">
+                            <option value="">-- Select Reason --</option>
+                            <option value="Customer Request">Customer Request</option>
+                            <option value="Schedule Change">Schedule Change</option>
+                            <option value="Show Cancelled">Show Cancelled</option>
+                            <option value="Payment Issue">Payment Issue</option>
+                            <option value="Double Booking">Double Booking</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <small class="text-muted">Why is this ticket being cancelled?</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CancelDate" class="form-label">Cancellation Date <span class="text-danger">*</span></label>
+                        <input asp-for="CancelDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
+                    <button type="submit" class="btn btn-kumari"><i class="bi bi-check-circle me-2"></i>Record Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
