@@ -1,0 +1,178 @@
+@model TheaterCityHallMovieViewModel
+@{
+    ViewData["Title"] = "Select Show - " + Model.TheaterCityHallInfo?.HallName;
+}
+
+<!-- Breadcrumb Navigation -->
+<div class="mb-4">
+    <nav style="--bs-breadcrumb-divider: '>'; " aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background: transparent; padding: 10px 0;">
+            <li class="breadcrumb-item"><a href="@Url.Action("Theaters")">Theaters</a></li>
+            <li class="breadcrumb-item active" style="color: #ffd700;">@Model.TheaterCityHallInfo?.TheaterName</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <div>
+        <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+            <i class="bi bi-play-circle me-3"></i>Select a Showtime
+        </h1>
+        <p style="color: #b0b0b0; font-size: 16px;">
+            <strong>@Model.TheaterCityHallInfo?.TheaterName</strong> - @Model.TheaterCityHallInfo?.HallName
+            <br />
+            <small>Capacity: @Model.TheaterCityHallInfo?.Capacity seats</small>
+        </p>
+    </div>
+</div>
+
+@if (Model.MovieShows == null || !Model.MovieShows.Any())
+{
+    <div class="alert alert-info text-center py-5">
+        <i class="bi bi-calendar-x" style="font-size: 48px; color: #ffd700;"></i>
+        <h4 class="mt-3">No Shows Available</h4>
+        <p>There are currently no shows scheduled for this hall.</p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var show in Model.MovieShows)
+        {
+            <div class="col-lg-6">
+                <div class="movie-show-card shadow-lg">
+                    <!-- Movie Poster Area -->
+                    <div class="movie-poster-area" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 0 -20px; margin-bottom: 20px;">
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center">
+                                <div style="width: 120px; height: 160px; background: linear-gradient(135deg, #333 0%, #555 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                    <i class="bi bi-film" style="font-size: 48px; color: #ffd700;"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h5 class="text-white mb-2" style="color: #ffd700;">@show.Title</h5>
+                                <small style="color: #b0b0b0;">
+                                    <div><i class="bi bi-hourglass me-2"></i>Duration: @show.Duration mins</div>
+                                    <div><i class="bi bi-globe me-2"></i>Language: @show.Language</div>
+                                    <div><i class="bi bi-tag me-2"></i>Genre: @show.Genre</div>
+                                    <div><i class="bi bi-calendar me-2"></i>Released: @show.ReleaseDate.ToString("MMM dd, yyyy")</div>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Show Details -->
+                    <div class="card-body" style="color: #f0f0f0;">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div style="background: rgba(229, 9, 20, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #e50914;">
+                                    <small style="color: #b0b0b0;">SHOW DATE</small>
+                                    <div style="color: #ffd700; font-weight: 600; font-size: 18px;">
+                                        <i class="bi bi-calendar-event me-2"></i>@show.ShowDate.ToString("ddd, MMM dd")
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div style="background: rgba(255, 215, 0, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ffd700;">
+                                    <small style="color: #b0b0b0;">SHOWTIME</small>
+                                    <div style="color: #ffd700; font-weight: 600; font-size: 18px;">
+                                        <i class="bi bi-clock me-2"></i>@show.ShowTime
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="mt-3 mb-3">
+                            @if (show.ShowStatus == "Active")
+                            {
+                                <span class="status-badge available">
+                                    <i class="bi bi-check-circle me-1"></i>Open for Booking
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="status-badge pending">
+                                    <i class="bi bi-hourglass me-1"></i>@show.ShowStatus
+                                </span>
+                            }
+                        </div>
+
+                        <!-- CTA Button -->
+                        <a href="@Url.Action("SelectSeats", new { showId = show.ShowID })" 
+                           class="btn btn-kumari w-100"
+                           style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+                            <i class="bi bi-chairs me-2"></i>Select Seats
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .movie-show-card {
+        background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%);
+        border: 2px solid #333333;
+        border-radius: 16px;
+        padding: 20px;
+        transition: all 0.35s cubic-bezier(0.34, 0.1, 0.68, 0.55);
+    }
+
+    .movie-show-card:hover {
+        border-color: #ffd700;
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(229, 9, 20, 0.4) !important;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+
+    .breadcrumb {
+        color: #b0b0b0;
+    }
+
+    .breadcrumb-item a {
+        color: #ffd700 !important;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-badge.available {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    .status-badge.pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+    }
+
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 32px !important;
+        }
+        
+        .row g-3 {
+            gap: 12px;
+        }
+    }
+</style>

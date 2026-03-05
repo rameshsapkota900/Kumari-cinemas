@@ -1,0 +1,238 @@
+@model ReviewBookingViewModel
+@{
+    ViewData["Title"] = "Review Booking - " + Model.MovieTitle;
+}
+
+<!-- Breadcrumb -->
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background: transparent; padding: 10px 0;">
+            <li class="breadcrumb-item"><a href="@Url.Action("Theaters")" style="color: #ffd700;">Booking</a></li>
+            <li class="breadcrumb-item active" style="color: #b0b0b0;">Review Order</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+        <i class="bi bi-clipboard-check me-3"></i>Review Your Booking
+    </h1>
+    <p style="color: #b0b0b0; font-size: 16px;">Verify details before payment</p>
+</div>
+
+<div class="row g-4">
+    <!-- Booking Details (Left Column) -->
+    <div class="col-lg-8">
+        <!-- Movie & Show Details -->
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px; margin-bottom: 24px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+                <h4 class="mb-0 text-white">
+                    <i class="bi bi-film me-2"></i>Movie & Showtime
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <div style="width: 100px; height: 140px; background: linear-gradient(135deg, #333 0%, #555 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <i class="bi bi-film" style="font-size: 48px; color: #ffd700;"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <h5 style="color: #ffd700; margin-bottom: 12px;">@Model.MovieTitle</h5>
+                        <div style="color: #b0b0b0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <small style="color: #999;">Duration</small>
+                                <div style="color: #f0f0f0; font-weight: 600;">@Model.Duration mins</div>
+                            </div>
+                            <div>
+                                <small style="color: #999;">Language</small>
+                                <div style="color: #f0f0f0; font-weight: 600;">@Model.Language</div>
+                            </div>
+                            <div>
+                                <small style="color: #999;">Genre</small>
+                                <div style="color: #f0f0f0; font-weight: 600;">@Model.Genre</div>
+                            </div>
+                            <div>
+                                <small style="color: #999;">Rating</small>
+                                <div style="color: #f0f0f0; font-weight: 600;">PG-13</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border-color: #333; margin: 20px 0;">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #f59e0b;">
+                            <small style="color: #b0b0b0;">DATE</small>
+                            <div style="color: #ffd700; font-weight: 600; margin-top: 4px;">
+                                @Model.ShowDate.ToString("dddd, MMM dd, yyyy")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #10b981;">
+                            <small style="color: #b0b0b0;">TIME</small>
+                            <div style="color: #10b981; font-weight: 600; margin-top: 4px;">
+                                @Model.ShowTime
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theater & Hall Details -->
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px; margin-bottom: 24px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                <h4 class="mb-0 text-white">
+                    <i class="bi bi-building me-2"></i>Theater Location
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div>
+                            <small style="color: #b0b0b0; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Theater</small>
+                            <h5 style="color: #ffd700; margin: 8px 0;">@Model.TheaterName</h5>
+                            <p style="color: #b0b0b0; margin: 0;">
+                                <i class="bi bi-geo-alt me-2"></i>@Model.TheaterCity
+                            </p>
+                            <small style="color: #666;">@Model.TheaterAddress</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <small style="color: #b0b0b0; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Screening Hall</small>
+                            <h5 style="color: #10b981; margin: 8px 0;">@Model.HallName</h5>
+                            <p style="color: #b0b0b0; margin: 0;">
+                                <i class="bi bi-people me-2"></i>Capacity: @Model.HallCapacity seats
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Seats -->
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none;">
+                <h4 class="mb-0 text-white">
+                    <i class="bi bi-chairs me-2"></i>Your Seats
+                </h4>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px;">
+                    @foreach (var seat in Model.SelectedSeats)
+                    {
+                        <div style="background: linear-gradient(135deg, rgba(229, 9, 20, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%); padding: 12px; border-radius: 6px; text-align: center; border: 1px solid #e50914;">
+                            <div style="color: #ffd700; font-weight: 600; font-size: 18px;">@seat.SeatNumber</div>
+                            <small style="color: #b0b0b0;">@seat.Category</small>
+                            <div style="color: #10b981; font-weight: 600; margin-top: 4px;">₹@seat.Price.ToString("F2")</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Summary (Right Column) -->
+    <div class="col-lg-4">
+        <div class="card sticky-top" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px; top: 20px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #ffd700 0%, #f59e0b 100%); border: none;">
+                <h4 class="mb-0 text-dark">
+                    <i class="bi bi-receipt me-2"></i>Order Summary
+                </h4>
+            </div>
+
+            <div class="card-body">
+                <!-- Seats Summary -->
+                <div class="summary-item">
+                    <span style="color: #b0b0b0;">Seats Selected</span>
+                    <span style="color: #ffd700; font-weight: 600;">@Model.SelectedSeats.Count</span>
+                </div>
+
+                <!-- Price Breakdown -->
+                @foreach (var category in Model.SelectedSeats.GroupBy(s => s.Category))
+                {
+                    var categorySeats = category.ToList();
+                    var categoryTotal = categorySeats.Sum(s => s.Price);
+
+                    <div class="summary-item">
+                        <span style="color: #b0b0b0;">
+                            @category.Key (@categorySeats.Count @(categorySeats.Count > 1 ? "seats" : "seat"))
+                        </span>
+                        <span style="color: #f0f0f0;">₹@categoryTotal.ToString("F2")</span>
+                    </div>
+                }
+
+                <div class="summary-item" style="border-bottom: 1px solid #333; padding-bottom: 12px;">
+                    <span style="color: #b0b0b0; font-size: 12px;">Convenience Fee (0%)</span>
+                    <span style="color: #f0f0f0;">₹0.00</span>
+                </div>
+
+                <!-- Total -->
+                <div class="summary-item" style="margin: 16px 0; padding: 16px 0; border-top: 1px solid #333;">
+                    <span style="color: #ffd700; font-weight: 600; font-size: 16px;">Total Amount</span>
+                    <span style="color: #ffd700; font-weight: 700; font-size: 24px;">₹@Model.TotalAmount.ToString("F2")</span>
+                </div>
+
+                <!-- Booking Form -->
+                <form method="post" action="@Url.Action("CompleteBooking")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="showId" value="@Model.ShowID" />
+                    <input type="hidden" name="seatIds" value="@string.Join(",", Model.SelectedSeats.Select(s => s.SeatID))" />
+                    
+                    <button type="submit" class="btn btn-kumari w-100" style="background: linear-gradient(135deg, #ffd700 0%, #f59e0b 100%); color: black; border: none; padding: 12px; font-weight: 600; font-size: 16px; margin-bottom: 12px;">
+                        <i class="bi bi-credit-card me-2"></i>Proceed to Payment
+                    </button>
+                </form>
+
+                <!-- Modification Button -->
+                <a href="javascript:history.back()" class="btn btn-outline-secondary w-100" style="border-color: #666; color: #b0b0b0; padding: 12px;">
+                    <i class="bi bi-arrow-left me-2"></i>Modify Seats
+                </a>
+
+                <!-- Info Boxes -->
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #10b981; margin-top: 16px; color: #10b981; font-size: 12px;">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    <strong>Secure Payment:</strong> Your payment is encrypted and secure
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #3b82f6; margin-top: 12px; color: #3b82f6; font-size: 12px;">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Reservation:</strong> Your seats are reserved for 10 minutes
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+    }
+
+    .sticky-top {
+        top: 20px;
+    }
+
+    @media (max-width: 1024px) {
+        .sticky-top {
+            position: static;
+            margin-top: 24px;
+        }
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+</style>

@@ -1,0 +1,247 @@
+@model SeatSelectionViewModel
+@{
+    ViewData["Title"] = "Select Seats - " + Model.MovieTitle;
+}
+
+<!-- Breadcrumb Navigation -->
+<div class="mb-3">
+    <nav style="--bs-breadcrumb-divider: '>'; " aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background: transparent; padding: 10px 0; margin-bottom: 0;">
+            <li class="breadcrumb-item"><a href="@Url.Action("Theaters")">Theaters</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Shows", new { hallId = Model.Seats?.FirstOrDefault()?.TicketPriceID })">Shows</a></li>
+            <li class="breadcrumb-item active" style="color: #ffd700;">Select Seats</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Movie Info Header -->
+<div class="movie-info-header mb-5" style="background: linear-gradient(135deg, rgba(229, 9, 20, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%); padding: 24px; border-radius: 16px; border: 1px solid #333333;">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h2 style="color: #ffd700; margin: 0;">
+                <i class="bi bi-film me-2"></i>@Model.MovieTitle
+            </h2>
+            <p style="color: #b0b0b0; margin: 8px 0 0 0;">
+                <i class="bi bi-building me-1"></i>@Model.TheaterName - @Model.HallName
+            </p>
+        </div>
+        <div class="col-md-6 text-end">
+            <div style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); padding: 12px 16px; border-radius: 8px; border: 1px solid #333333;">
+                <div style="font-size: 12px; color: #b0b0b0;">Date & Time</div>
+                <div style="color: #ffd700; font-weight: 600;">
+                    <i class="bi bi-calendar-event me-2"></i>@Model.ShowDate.ToString("ddd, MMM dd")
+                    <i class="bi bi-clock me-2 ms-3"></i>@Model.ShowTime
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seat Legend -->
+<div class="seat-legend mb-4">
+    <div class="legend-item">
+        <div class="legend-seat available"></div>
+        <span>Available Seat</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-seat vip"></div>
+        <span>VIP Seat (Premium)</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-seat booked"></div>
+        <span>Booked Seat</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-seat selected"></div>
+        <span>Selected Seat</span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Seat Selection Area (Left Column) -->
+    <div class="col-lg-8">
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333;">
+            <div class="card-body p-4">
+                <!-- Theater Screen -->
+                <div class="theater-screen mb-5">
+                    <div style="text-align: center; font-weight: 700; color: #ffd700; font-size: 18px; text-transform: uppercase; letter-spacing: 3px;">
+                        Screen
+                    </div>
+                </div>
+
+                <!-- Seat Grid -->
+                <div class="seat-grid" id="seatGrid">
+                    @if (Model.Seats != null && Model.Seats.Any())
+                    {
+                        @foreach (var seat in Model.Seats)
+                        {
+                            var statusClass = seat.Status == "Booked" ? "booked" : "available";
+                            var seatClass = seat.Category?.ToLower().Contains("vip") == true ? "vip" : "standard";
+                            
+                            <button type="button" 
+                                    class="seat @statusClass @seatClass" 
+                                    data-seat-id="@seat.SeatID"
+                                    data-seat-number="@seat.SeatNumber"
+                                    data-price="@seat.Price"
+                                    data-category="@seat.Category"
+                                    @if (seat.Status == "Booked") { <text> disabled </text> }
+                                    onclick="toggleSeat(event, '@seat.SeatNumber', @seat.Price)">
+                                @seat.SeatNumber
+                            </button>
+                        }
+                    }
+                </div>
+
+                <!-- Notes -->
+                <div style="text-align: center; margin-top: 24px; color: #b0b0b0; font-size: 12px;">
+                    <i class="bi bi-info-circle me-2"></i>Maximum 10 seats per booking | Hover over a seat to see details
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Summary (Right Column) -->
+    <div class="col-lg-4">
+        <div class="booking-summary sticky-top">
+            <h4 style="color: #ffd700; margin: 0 0 16px 0; font-size: 18px;">
+                <i class="bi bi-receipt me-2"></i>Booking Summary
+            </h4>
+
+            <!-- Selected Seats List -->
+            <div id="selectedSeatsList" style="background: #1a1f2e; padding: 12px; border-radius: 8px; margin-bottom: 16px; min-height: 80px; max-height: 200px; overflow-y: auto;">
+                <p style="color: #b0b0b0; margin: 0; text-align: center; padding: 20px 0;">
+                    <i class="bi bi-hand-index me-2"></i>Select seats to start booking
+                </p>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div style="background: #1a1f2e; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                <div class="booking-item">
+                    <span class="booking-item-label">Seats Selected:</span>
+                    <span class="booking-item-value" id="seatCount">0</span>
+                </div>
+                <div class="booking-item" style="border-bottom: 1px solid #333;">
+                    <span class="booking-item-label">Subtotal:</span>
+                    <span class="booking-item-value" id="subtotal">₹0</span>
+                </div>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="booking-total">
+                <span>Total Amount:</span>
+                <span class="total-amount" id="totalAmount">₹0</span>
+            </div>
+
+            <!-- Proceed Button -->
+            <form id="bookingForm" method="post" action="@Url.Action("ReviewBooking")" class="mt-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="showId" value="@Model.ShowID" />
+                <input type="hidden" name="selectedSeatIds" id="selectedSeatIds" />
+                
+                <button type="submit" 
+                        class="btn btn-kumari w-100" 
+                        id="proceedBtn"
+                        disabled
+                        style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none; padding: 12px; font-size: 16px; font-weight: 600;">
+                    <i class="bi bi-credit-card me-2"></i>Proceed to Payment
+                </button>
+                <small style="display: block; text-align: center; color: #b0b0b0; margin-top: 8px;">
+                    <i class="bi bi-shield-lock me-1"></i>Secure payment gateway
+                </small>
+            </form>
+
+            <!-- Info Box -->
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #10b981; margin-top: 16px; color: #10b981; font-size: 12px;">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Tip:</strong> Premium (VIP) seats offer better viewing angles and comfort.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedSeats = {};
+        let totalAmount = 0;
+
+        function toggleSeat(event, seatNumber, price) {
+            event.preventDefault();
+            const seat = event.target;
+            
+            if (seat.disabled) return;
+
+            if (seat.classList.contains('selected')) {
+                seat.classList.remove('selected');
+                delete selectedSeats[seatNumber];
+                totalAmount -= price;
+            } else {
+                if (Object.keys(selectedSeats).length >= @Model.MaxSeats) {
+                    alert('Maximum ' + @Model.MaxSeats + ' seats can be selected');
+                    return;
+                }
+                seat.classList.add('selected');
+                selectedSeats[seatNumber] = price;
+                totalAmount += price;
+            }
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const count = Object.keys(selectedSeats).length;
+            const seatsList = document.getElementById('selectedSeatsList');
+            
+            if (count === 0) {
+                seatsList.innerHTML = '<p style="color: #b0b0b0; margin: 0; text-align: center; padding: 20px 0;"><i class="bi bi-hand-index me-2"></i>Select seats to start booking</p>';
+                document.getElementById('proceedBtn').disabled = true;
+            } else {
+                let html = '<div style="display: flex; flex-wrap: wrap; gap: 8px;">';
+                for (let seat in selectedSeats) {
+                    html += '<span class="badge" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); padding: 6px 10px; border-radius: 4px;">' + seat + '</span>';
+                }
+                html += '</div>';
+                seatsList.innerHTML = html;
+                document.getElementById('proceedBtn').disabled = false;
+            }
+
+            document.getElementById('seatCount').textContent = count;
+            document.getElementById('subtotal').textContent = '₹' + totalAmount.toFixed(2);
+            document.getElementById('totalAmount').textContent = '₹' + totalAmount.toFixed(2);
+            
+            // Update hidden input
+            const seatIds = Object.keys(selectedSeats);
+            document.getElementById('selectedSeatIds').value = JSON.stringify(seatIds);
+        }
+
+        // Initialize with first check
+        updateSummary();
+    </script>
+}
+
+<style>
+    .movie-info-header {
+        animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .sticky-top {
+        top: 20px;
+    }
+
+    @media (max-width: 1024px) {
+        .sticky-top {
+            position: static;
+            margin-top: 24px;
+        }
+    }
+</style>

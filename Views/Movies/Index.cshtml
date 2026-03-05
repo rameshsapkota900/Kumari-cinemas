@@ -1,51 +1,208 @@
 @model List<Movie>
 @{
-    ViewData["Title"] = "Movie Details";
+    ViewData["Title"] = "Movie Catalogue Management";
 }
 
-<div class="page-header">
-    <h2><i class="bi bi-film me-2"></i>Movie Catalogue</h2>
-    <p>Manage the cinema movie library, screenings, and upcoming releases</p>
-</div>
-
-<div class="card">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">All Movies</h5>
-        <a asp-action="Create" class="btn btn-kumari btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Movie</a>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-kumari table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>MovieID</th>
-                        <th>Title</th>
-                        <th>Duration (min)</th>
-                        <th>Language</th>
-                        <th>Genre</th>
-                        <th>Release Date</th>
-                        <th class="text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var m in Model)
-                    {
-                        <tr>
-                            <td><strong>@m.MovieID</strong></td>
-                            <td>@m.Title</td>
-                            <td><span class="badge bg-secondary">@m.Duration min</span></td>
-                            <td>@m.Language</td>
-                            <td><span class="badge bg-info">@m.Genre</span></td>
-                            <td>@m.ReleaseDate.ToString("yyyy-MM-dd")</td>
-                            <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@m.MovieID" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                <a asp-action="Delete" asp-route-id="@m.MovieID" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                <i class="bi bi-film me-3"></i>Movie Catalogue
+            </h1>
+            <p style="color: #b0b0b0; font-size: 16px;">Manage movies, releases, and screening details</p>
         </div>
     </div>
-    <div class="card-footer bg-white text-muted small">Total Movies: <strong>@Model.Count</strong></div>
 </div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="stat-card movies">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-camera-reels stat-icon"></i>
+                        <div class="stat-label">Total Movies</div>
+                        <div class="stat-value">@Model.Count</div>
+                    </div>
+                    <a asp-action="Create" class="btn btn-kumari" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card theaters">
+            <div class="card-body">
+                <i class="bi bi-calendar-check stat-icon"></i>
+                <div class="stat-label">Active Releases</div>
+                <div class="stat-value">@Model.Where(m => m.ReleaseDate <= DateTime.Now).Count()</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card halls">
+            <div class="card-body">
+                <i class="bi bi-hourglass stat-icon"></i>
+                <div class="stat-label">Upcoming Releases</div>
+                <div class="stat-value">@Model.Where(m => m.ReleaseDate > DateTime.Now).Count()</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Movies Table -->
+<div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+    <div class="card-header" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+        <h4 class="mb-0 text-white">
+            <i class="bi bi-collection me-2"></i>Movie Library
+        </h4>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 48px; color: #666;"></i>
+            <p class="text-muted mt-3">No movies in catalogue yet. <a href="@Url.Action("Create")" style="color: #ffd700;">Add a movie</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-kumari table-hover mb-0">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #333;">
+                            <th>Movie</th>
+                            <th>Details</th>
+                            <th>Duration</th>
+                            <th>Genre</th>
+                            <th>Release Date</th>
+                            <th>Status</th>
+                            <th style="width: 100px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var movie in Model.OrderByDescending(m => m.ReleaseDate))
+                        {
+                            var isReleased = movie.ReleaseDate <= DateTime.Now;
+                            var statusColor = isReleased ? "#10b981" : "#f59e0b";
+                            var statusText = isReleased ? "Released" : "Upcoming";
+                            var statusIcon = isReleased ? "check-circle" : "calendar-event";
+
+                            <tr>
+                                <td>
+                                    <div style="color: #f0f0f0; font-weight: 600;">
+                                        <i class="bi bi-film" style="color: #ffd700; margin-right: 8px;"></i>@movie.Title
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 12px;">
+                                        <div style="color: #b0b0b0;">
+                                            <i class="bi bi-globe me-1"></i>@movie.Language
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; border: 1px solid #ffd700;">
+                                        @movie.Duration min
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6;">
+                                        @movie.Genre
+                                    </span>
+                                </td>
+                                <td style="color: #b0b0b0;">
+                                    @movie.ReleaseDate.ToString("MMM dd, yyyy")
+                                </td>
+                                <td>
+                                    <span style="background: rgba(@(isReleased ? "16,185,129" : "245,158,11"), 0.2); color: @statusColor; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid @statusColor;">
+                                        <i class="bi bi-@statusIcon me-1"></i>@statusText
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@movie.MovieID" class="btn btn-sm btn-edit" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@movie.MovieID" class="btn btn-sm btn-delete" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    
+    <div class="card-footer" style="background: transparent; border-top: 1px solid #333; padding: 16px 20px;">
+        <small style="color: #b0b0b0;">
+            <i class="bi bi-info-circle me-1"></i>
+            Total Movies: <strong style="color: #ffd700;">@Model.Count</strong> | 
+            Released: <strong style="color: #10b981;">@Model.Where(m => m.ReleaseDate <= DateTime.Now).Count()</strong> | 
+            Upcoming: <strong style="color: #f59e0b;">@Model.Where(m => m.ReleaseDate > DateTime.Now).Count()</strong>
+        </small>
+    </div>
+</div>
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+
+    .stat-card {
+        border: 2px solid #333333;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: #ffd700;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(229, 9, 20, 0.2);
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .table-kumari tbody tr {
+        border-bottom: 1px solid #333333;
+        transition: background-color 0.2s ease;
+    }
+
+    .table-kumari tbody tr:hover {
+        background-color: rgba(255, 215, 0, 0.05);
+    }
+</style>

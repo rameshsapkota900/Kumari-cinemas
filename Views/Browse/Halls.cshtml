@@ -1,0 +1,126 @@
+@model List<dynamic>
+@{
+    ViewData["Title"] = "Select Hall - " + ViewBag.TheaterName;
+}
+
+<!-- Breadcrumb Navigation -->
+<div class="mb-4">
+    <nav style="--bs-breadcrumb-divider: '>'; " aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background: transparent; padding: 10px 0;">
+            <li class="breadcrumb-item"><a href="@Url.Action("Theaters")">Theaters</a></li>
+            <li class="breadcrumb-item active" style="color: #ffd700;">@ViewBag.TheaterName</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <div>
+        <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+            <i class="bi bi-door-open me-3"></i>Select a Hall
+        </h1>
+        <p style="color: #b0b0b0; font-size: 16px;">
+            <strong>Theater:</strong> @ViewBag.TheaterName, @ViewBag.TheaterCity
+        </p>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center py-5">
+        <i class="bi bi-info-circle" style="font-size: 48px;"></i>
+        <h4 class="mt-3">No Halls Available</h4>
+        <p>This theater currently has no halls configured.</p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var hall in Model)
+        {
+            <div class="col-lg-3 col-md-6">
+                <div class="hall-card shadow-lg">
+                    <!-- Hall Status Header -->
+                    <div style="background: linear-gradient(135deg, #1e2936 0%, #0a0d14 100%); padding: 16px; border-radius: 12px 12px 0 0; margin: -20px -20px 0 -20px; margin-bottom: 16px; border-bottom: 2px solid #ffd700;">
+                        <h5 class="text-white mb-2" style="color: #ffd700;">
+                            <i class="bi bi-film me-2"></i>@hall.HallName
+                        </h5>
+                        <div style="font-size: 12px; color: #b0b0b0;">
+                            <i class="bi bi-people me-1"></i>Capacity: <strong>@hall.Capacity seats</strong>
+                        </div>
+                    </div>
+
+                    <!-- Hall Info -->
+                    <div class="card-body" style="color: #f0f0f0;">
+                        <!-- Upcoming Shows Badge -->
+                        @if (hall.UpcomingShows > 0)
+                        {
+                            <div class="alert alert-success mb-3" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; padding: 10px;">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                <strong>@hall.UpcomingShows upcoming show(s)</strong>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning mb-3" style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #f59e0b; padding: 10px;">
+                                <i class="bi bi-calendar-x me-2"></i>
+                                <strong>No shows scheduled</strong>
+                            </div>
+                        }
+
+                        <!-- CTA Button -->
+                        <a href="@Url.Action("Shows", new { hallId = hall.HallID })" 
+                           class="btn btn-kumari w-100"
+                           style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none; margin-top: 12px;">
+                            <i class="bi bi-play-circle me-2"></i>View Shows
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .hall-card {
+        background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%);
+        border: 2px solid #333333;
+        border-radius: 16px;
+        padding: 20px;
+        transition: all 0.35s cubic-bezier(0.34, 0.1, 0.68, 0.55);
+        cursor: pointer;
+    }
+
+    .hall-card:hover {
+        border-color: #ffd700;
+        transform: translateY(-6px);
+        box-shadow: 0 16px 32px rgba(229, 9, 20, 0.3) !important;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+
+    .breadcrumb {
+        color: #b0b0b0;
+    }
+
+    .breadcrumb-item a {
+        color: #ffd700 !important;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 32px !important;
+        }
+    }
+</style>

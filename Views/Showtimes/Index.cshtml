@@ -1,60 +1,203 @@
 @model List<Show>
 @{
-    ViewData["Title"] = "Showtimes Details";
+    ViewData["Title"] = "Show Schedule Management";
 }
 
-<div class="page-header">
-    <h2><i class="bi bi-clock me-2"></i>Show Schedule</h2>
-    <p>Manage movie screenings, timings, and hall assignments</p>
-</div>
-
-<div class="card">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">All Showtimes</h5>
-        <a asp-action="Create" class="btn btn-kumari btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Show</a>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-kumari table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>ShowID</th>
-                        <th>Show Date</th>
-                        <th>Show Time</th>
-                        <th>Status</th>
-                        <th>Movie</th>
-                        <th>Hall</th>
-                        <th class="text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var s in Model)
-                    {
-                        <tr>
-                            <td><strong>@s.ShowID</strong></td>
-                            <td>@s.ShowDate.ToString("yyyy-MM-dd")</td>
-                            <td><span class="badge bg-secondary">@s.ShowTime</span></td>
-                            <td>
-                                @if (s.ShowStatus == "Active" || s.ShowStatus == "Scheduled")
-                                {
-                                    <span class="badge bg-success">@s.ShowStatus</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">@s.ShowStatus</span>
-                                }
-                            </td>
-                            <td>@s.MovieTitle</td>
-                            <td>@s.HallName <span class="text-muted small">(@s.TheaterName)</span></td>
-                            <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@s.ShowID" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                <a asp-action="Delete" asp-route-id="@s.ShowID" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                <i class="bi bi-clock me-3"></i>Show Schedule
+            </h1>
+            <p style="color: #b0b0b0; font-size: 16px;">Manage movie screenings, timings, and hall assignments</p>
         </div>
     </div>
-    <div class="card-footer bg-white text-muted small">Total Shows: <strong>@Model.Count</strong></div>
 </div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="stat-card shows">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-clock stat-icon"></i>
+                        <div class="stat-label">Total Shows</div>
+                        <div class="stat-value">@Model.Count</div>
+                    </div>
+                    <a asp-action="Create" class="btn btn-kumari" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card bookings">
+            <div class="card-body">
+                <i class="bi bi-calendar-check stat-icon"></i>
+                <div class="stat-label">Active Shows</div>
+                <div class="stat-value">@Model.Where(s => (s.ShowStatus == "Active" || s.ShowStatus == "Scheduled") && s.ShowDate >= DateTime.Now).Count()</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card users">
+            <div class="card-body">
+                <i class="bi bi-hourglass stat-icon"></i>
+                <div class="stat-label">Upcoming Shows</div>
+                <div class="stat-value">@Model.Where(s => s.ShowDate > DateTime.Now).Count()</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Showtimes Table -->
+<div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+    <div class="card-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none;">
+        <h4 class="mb-0 text-white">
+            <i class="bi bi-calendar-event me-2"></i>Scheduled Showtimes
+        </h4>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 48px; color: #666;"></i>
+            <p class="text-muted mt-3">No shows scheduled yet. <a href="@Url.Action("Create")" style="color: #ffd700;">Schedule a show</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-kumari table-hover mb-0">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #333;">
+                            <th>Show</th>
+                            <th>Date & Time</th>
+                            <th>Location</th>
+                            <th>Hall Details</th>
+                            <th>Status</th>
+                            <th style="width: 100px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var show in Model.OrderByDescending(s => s.ShowDate))
+                        {
+                            var isActive = show.ShowStatus == "Active" || show.ShowStatus == "Scheduled";
+                            var isUpcoming = show.ShowDate > DateTime.Now;
+                            var statusColor = isActive && isUpcoming ? "#10b981" : (isActive ? "#f59e0b" : "#ef4444");
+                            var statusIcon = isActive && isUpcoming ? "play-circle" : (isActive ? "exclamation-circle" : "x-circle");
+
+                            <tr>
+                                <td>
+                                    <div style="color: #f0f0f0; font-weight: 600;">
+                                        <i class="bi bi-film" style="color: #ffd700; margin-right: 8px;"></i>@show.MovieTitle
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="color: #b0b0b0;">
+                                        <i class="bi bi-calendar me-1" style="color: #f59e0b;"></i>@show.ShowDate.ToString("MMM dd, yyyy")
+                                        <br />
+                                        <i class="bi bi-clock me-1" style="color: #ffd700;"></i>
+                                        <strong style="color: #ffd700;">@show.ShowTime</strong>
+                                    </div>
+                                </td>
+                                <td style="color: #b0b0b0;">
+                                    <div><i class="bi bi-building me-1"></i>@show.TheaterName</div>
+                                    <small>@show.TheaterCity</small>
+                                </td>
+                                <td style="color: #b0b0b0;">
+                                    <div><i class="bi bi-door-open me-1" style="color: #10b981;"></i>@show.HallName</div>
+                                    <small>@show.Capacity seats</small>
+                                </td>
+                                <td>
+                                    <span style="background: rgba(@(isActive && isUpcoming ? "16,185,129" : (isActive ? "245,158,11" : "239,68,68")), 0.2); color: @statusColor; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid @statusColor;">
+                                        <i class="bi bi-@statusIcon me-1"></i>@show.ShowStatus
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@show.ShowID" class="btn btn-sm btn-edit" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@show.ShowID" class="btn btn-sm btn-delete" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <div class="card-footer" style="background: transparent; border-top: 1px solid #333; padding: 16px 20px;">
+        <small style="color: #b0b0b0;">
+            <i class="bi bi-info-circle me-1"></i>
+            Total Shows: <strong style="color: #ffd700;">@Model.Count</strong> | 
+            Active: <strong style="color: #10b981;">@Model.Where(s => s.ShowStatus == "Active" || s.ShowStatus == "Scheduled").Count()</strong> | 
+            Upcoming: <strong style="color: #f59e0b;">@Model.Where(s => s.ShowDate > DateTime.Now).Count()</strong>
+        </small>
+    </div>
+</div>
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+
+    .stat-card {
+        border: 2px solid #333333;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: #ffd700;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(229, 9, 20, 0.2);
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .table-kumari tbody tr {
+        border-bottom: 1px solid #333333;
+        transition: background-color 0.2s ease;
+    }
+
+    .table-kumari tbody tr:hover {
+        background-color: rgba(255, 215, 0, 0.05);
+    }
+</style>

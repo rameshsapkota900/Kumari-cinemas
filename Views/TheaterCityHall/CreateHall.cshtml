@@ -4,43 +4,161 @@
     var theaters = ViewBag.Theaters as List<Theater> ?? new List<Theater>();
 }
 
-<div class="page-header">
-    <h2><i class="bi bi-door-open me-2"></i>Add New Hall</h2>
-    <p>Add a new screening hall to a theater</p>
+<!-- Breadcrumb -->
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background: transparent; padding: 10px 0;">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index")" style="color: #ffd700;">Theater Management</a></li>
+            <li class="breadcrumb-item active" style="color: #b0b0b0;">Add New Hall</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+        <i class="bi bi-door-open me-3"></i>Add New Screening Hall
+    </h1>
+    <p style="color: #b0b0b0;">Create a new theater screen with seating configuration</p>
 </div>
 
 <div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="form-section">
-            <form asp-action="CreateHall" method="post">
-                @Html.AntiForgeryToken()
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label asp-for="HallName" class="form-label">Hall Name <span class="text-danger">*</span></label>
-                        <input asp-for="HallName" class="form-control" maxlength="30" required />
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Capacity" class="form-label">Capacity <span class="text-danger">*</span></label>
-                        <input asp-for="Capacity" type="number" class="form-control" min="1" required />
-                    </div>
-                    <div class="col-md-12">
-                        <label asp-for="TheaterID" class="form-label">Select Theater <span class="text-danger">*</span></label>
-                        <select asp-for="TheaterID" class="form-select" required>
-                            <option value="">-- Select Theater --</option>
+    <div class="col-lg-7">
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 20px;">
+                <h4 class="text-white mb-0">
+                    <i class="bi bi-film me-2"></i>Hall Configuration
+                </h4>
+            </div>
+
+            <div class="card-body" style="padding: 30px;">
+                <form asp-action="CreateHall" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- Theater Selection -->
+                    <div class="mb-4">
+                        <label asp-for="TheaterID" class="form-label" style="color: #ffd700; font-weight: 600;">
+                            <i class="bi bi-building me-2"></i>Select Theater <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="TheaterID" class="form-select form-select-theater" required>
+                            <option value="">-- Choose Theater --</option>
                             @foreach (var t in theaters)
                             {
-                                <option value="@t.TheaterID">@t.Name — @t.City</option>
+                                <option value="@t.TheaterID">@t.Name (📍 @t.City)</option>
                             }
                         </select>
-                        <small class="text-muted">Choose the theater this hall belongs to</small>
+                        <small style="color: #b0b0b0;">Select the cinema location for this hall</small>
                     </div>
-                </div>
-                <hr />
-                <div class="d-flex justify-content-between">
-                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
-                    <button type="submit" class="btn btn-kumari"><i class="bi bi-check-circle me-2"></i>Create Hall</button>
-                </div>
-            </form>
+
+                    <!-- Hall Name -->
+                    <div class="mb-4">
+                        <label asp-for="HallName" class="form-label" style="color: #ffd700; font-weight: 600;">
+                            <i class="bi bi-film me-2"></i>Hall Name <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="HallName" 
+                               class="form-control form-control-theater" 
+                               maxlength="30" 
+                               placeholder="e.g., Screen A, IMAX Hall, VIP Screen"
+                               required />
+                        <small style="color: #b0b0b0;">Unique name to identify this screening hall</small>
+                    </div>
+
+                    <!-- Capacity -->
+                    <div class="mb-4">
+                        <label asp-for="Capacity" class="form-label" style="color: #ffd700; font-weight: 600;">
+                            <i class="bi bi-people me-2"></i>Seating Capacity <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input asp-for="Capacity" 
+                                   type="number" 
+                                   class="form-control form-control-theater" 
+                                   min="10"
+                                   max="500"
+                                   step="10"
+                                   placeholder="e.g., 100"
+                                   required />
+                            <span class="input-group-text" style="background: #1a1f2e; border-color: #444; color: #b0b0b0;">seats</span>
+                        </div>
+                        <small style="color: #b0b0b0;">Must be a multiple of 10 (10 seats per row)</small>
+                    </div>
+
+                    <!-- Seat Configuration Info -->
+                    <div style="background: rgba(59, 130, 246, 0.1); padding: 16px; border-radius: 8px; border-left: 3px solid #3b82f6; margin-bottom: 24px;">
+                        <i class="bi bi-lightbulb" style="color: #3b82f6; margin-right: 8px;"></i>
+                        <small style="color: #3b82f6;">
+                            <strong>Auto-Configuration:</strong> Seats will be automatically arranged in rows of 10 (A1-A10, B1-B10, etc.)
+                        </small>
+                    </div>
+
+                    <!-- Pricing Tier Info -->
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 24px;">
+                        <i class="bi bi-info-circle" style="color: #10b981; margin-right: 8px;"></i>
+                        <small style="color: #10b981;">
+                            <strong>Pricing:</strong> Standard seats (Regular rows) and VIP seats (Last 2 rows) will be configured. You can adjust prices later.
+                        </small>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex gap-3 pt-3 border-top" style="border-color: #333;">
+                        <a asp-action="Index" class="btn btn-outline-secondary" style="border-color: #666; color: #b0b0b0;">
+                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-kumari ms-auto" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 10px 24px;">
+                            <i class="bi bi-check-circle me-2"></i>Create Hall
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .form-control-theater,
+    .form-select-theater {
+        background: #1a1f2e;
+        border: 1px solid #444;
+        color: #f0f0f0;
+        padding: 10px 12px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-theater:focus,
+    .form-select-theater:focus {
+        background: #1a1f2e;
+        border-color: #10b981;
+        color: #f0f0f0;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+    }
+
+    .form-control-theater::placeholder,
+    .form-select-theater::placeholder {
+        color: #666;
+    }
+
+    .form-select-theater option {
+        background: #1e2936;
+        color: #f0f0f0;
+    }
+
+    .input-group-text {
+        font-weight: 600;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+
+    .breadcrumb-item a {
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #fff !important;
+    }
+</style>

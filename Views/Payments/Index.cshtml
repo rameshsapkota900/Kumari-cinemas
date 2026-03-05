@@ -1,0 +1,451 @@
+@model List<PaymentViewModel>
+@{
+    ViewData["Title"] = "Payment Management";
+}
+
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                <i class="bi bi-credit-card me-3"></i>Payment Management
+            </h1>
+            <p style="color: #b0b0b0; font-size: 16px;">Review and approve customer payments</p>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card revenue">
+            <div class="card-body">
+                <i class="bi bi-currency-dollar stat-icon"></i>
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value">₹@Model.Sum(p => p.Amount).ToString("F0")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card movies">
+            <div class="card-body">
+                <i class="bi bi-check-circle stat-icon"></i>
+                <div class="stat-label">Approved</div>
+                <div class="stat-value">@Model.Count(p => p.Status == "Completed")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card halls">
+            <div class="card-body">
+                <i class="bi bi-hourglass stat-icon"></i>
+                <div class="stat-label">Pending</div>
+                <div class="stat-value">@Model.Count(p => p.Status == "Pending")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card users">
+            <div class="card-body">
+                <i class="bi bi-x-circle stat-icon"></i>
+                <div class="stat-label">Failed</div>
+                <div class="stat-value">@Model.Count(p => p.Status == "Failed")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="mb-4">
+    <ul class="nav nav-tabs" role="tablist" style="border-bottom: 2px solid #333;">
+        <li class="nav-item">
+            <a class="nav-link active" href="#all-payments" data-bs-toggle="tab" style="color: #ffd700;">
+                <i class="bi bi-list me-2"></i>All Payments (@Model.Count)
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#pending-payments" data-bs-toggle="tab" style="color: #f59e0b;">
+                <i class="bi bi-hourglass me-2"></i>Pending (@Model.Count(p => p.Status == "Pending"))
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#completed-payments" data-bs-toggle="tab" style="color: #10b981;">
+                <i class="bi bi-check-circle me-2"></i>Completed (@Model.Count(p => p.Status == "Completed"))
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#failed-payments" data-bs-toggle="tab" style="color: #ef4444;">
+                <i class="bi bi-x-circle me-2"></i>Failed (@Model.Count(p => p.Status == "Failed"))
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content">
+    <!-- All Payments Tab -->
+    <div class="tab-pane fade show active" id="all-payments">
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+                <h4 class="mb-0 text-white">
+                    <i class="bi bi-credit-card me-2"></i>All Payments
+                </h4>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 48px; color: #666;"></i>
+                    <p class="text-muted mt-3">No payments yet</p>
+                </div>
+            }
+            else
+            {
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-kumari table-hover mb-0">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #333;">
+                                    <th>Payment ID</th>
+                                    <th>Booking ID</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th style="width: 120px;" class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var payment in Model.OrderByDescending(p => p.PaymentDate))
+                                {
+                                    var statusColor = payment.Status == "Completed" ? "#10b981" : (payment.Status == "Pending" ? "#f59e0b" : "#ef4444");
+                                    var statusBg = payment.Status == "Completed" ? "rgba(16, 185, 129, 0.2)" : (payment.Status == "Pending" ? "rgba(245, 158, 11, 0.2)" : "rgba(239, 68, 68, 0.2)");
+
+                                    <tr>
+                                        <td>
+                                            <strong style="color: #ffd700;">@payment.PaymentID</strong>
+                                        </td>
+                                        <td style="color: #f0f0f0;">@payment.BookingID.ToString("D8")</td>
+                                        <td>
+                                            <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;">
+                                                ₹@payment.Amount.ToString("F2")
+                                            </span>
+                                        </td>
+                                        <td style="color: #b0b0b0;">
+                                            <i class="bi bi-credit-card me-1"></i>@payment.PaymentMethod
+                                        </td>
+                                        <td style="color: #b0b0b0;">@payment.PaymentDate.ToString("MMM dd, yyyy hh:mm")</td>
+                                        <td>
+                                            <span style="background: @statusBg; color: @statusColor; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid @statusColor;">
+                                                @payment.Status
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (payment.Status == "Pending")
+                                            {
+                                                <form method="post" action="@Url.Action("ApprovePayment")" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="paymentId" value="@payment.PaymentID" />
+                                                    <button type="submit" class="btn btn-sm btn-edit" title="Approve">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                </form>
+                                                <form method="post" action="@Url.Action("RejectPayment")" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="paymentId" value="@payment.PaymentID" />
+                                                    <button type="submit" class="btn btn-sm btn-delete" title="Reject">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("PaymentDetails", new { paymentId = payment.PaymentID })" class="btn btn-sm btn-edit" title="View">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pending Payments Tab -->
+    <div class="tab-pane fade" id="pending-payments">
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #f59e0b; border-radius: 12px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none;">
+                <h4 class="mb-0 text-white">
+                    <i class="bi bi-hourglass me-2"></i>Pending Payments (Awaiting Approval)
+                </h4>
+            </div>
+
+            @{
+                var pendingPayments = Model.Where(p => p.Status == "Pending").ToList();
+            }
+
+            @if (!pendingPayments.Any())
+            {
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-check-circle" style="font-size: 48px; color: #10b981;"></i>
+                    <p class="text-muted mt-3">All payments approved! No pending payments.</p>
+                </div>
+            }
+            else
+            {
+                <div class="card-body">
+                    @foreach (var payment in pendingPayments.OrderBy(p => p.PaymentDate))
+                    {
+                        <div class="payment-card mb-3">
+                            <div style="background: rgba(245, 158, 11, 0.1); padding: 16px; border-radius: 8px; border: 1px solid #f59e0b;">
+                                <div class="row align-items-start">
+                                    <div class="col-md-8">
+                                        <h6 style="color: #ffd700; margin-bottom: 12px;">
+                                            <i class="bi bi-credit-card me-2"></i>Booking #@payment.BookingID.ToString("D8")
+                                        </h6>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                            <div>
+                                                <small style="color: #b0b0b0;">Amount</small>
+                                                <div style="color: #f0f0f0; font-weight: 600;">₹@payment.Amount.ToString("F2")</div>
+                                            </div>
+                                            <div>
+                                                <small style="color: #b0b0b0;">Payment Method</small>
+                                                <div style="color: #f0f0f0; font-weight: 600;">@payment.PaymentMethod</div>
+                                            </div>
+                                            <div>
+                                                <small style="color: #b0b0b0;">Date</small>
+                                                <div style="color: #f0f0f0; font-weight: 600;">@payment.PaymentDate.ToString("MMM dd, yyyy")</div>
+                                            </div>
+                                            <div>
+                                                <small style="color: #b0b0b0;">Time Pending</small>
+                                                <div style="color: #f59e0b; font-weight: 600;">
+                                                    @{
+                                                        var pendingTime = DateTime.Now - payment.PaymentDate;
+                                                        if (pendingTime.TotalHours < 1)
+                                                        {
+                                                            @pendingTime.Minutes minutes
+                                                        }
+                                                        else
+                                                        {
+                                                            @((int)pendingTime.TotalHours) hours
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4" style="text-align: right;">
+                                        <form method="post" action="@Url.Action("ApprovePayment")" style="display: inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="paymentId" value="@payment.PaymentID" />
+                                            <button type="submit" class="btn btn-kumari me-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 8px 16px;">
+                                                <i class="bi bi-check-circle me-1"></i>Approve
+                                            </button>
+                                        </form>
+                                        <form method="post" action="@Url.Action("RejectPayment")" style="display: inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="paymentId" value="@payment.PaymentID" />
+                                            <button type="submit" class="btn btn-outline-danger" style="border-color: #ef4444; color: #ef4444; padding: 8px 16px;">
+                                                <i class="bi bi-x-circle me-1"></i>Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Completed Payments Tab -->
+    <div class="tab-pane fade" id="completed-payments">
+        @{
+            var completedPayments = Model.Where(p => p.Status == "Completed").ToList();
+        }
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #10b981; border-radius: 12px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                <h4 class="mb-0 text-white">
+                    <i class="bi bi-check-circle me-2"></i>Completed Payments (@completedPayments.Count)
+                </h4>
+            </div>
+            @if (!completedPayments.Any())
+            {
+                <div class="card-body text-center py-5">
+                    <p class="text-muted">No completed payments</p>
+                </div>
+            }
+            else
+            {
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-kumari mb-0">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #333;">
+                                    <th>Payment ID</th>
+                                    <th>Amount</th>
+                                    <th>Completed Date</th>
+                                    <th style="width: 100px;" class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var payment in completedPayments.OrderByDescending(p => p.PaymentDate))
+                                {
+                                    <tr>
+                                        <td><strong style="color: #ffd700;">@payment.PaymentID</strong></td>
+                                        <td><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">₹@payment.Amount.ToString("F2")</span></td>
+                                        <td style="color: #b0b0b0;">@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
+                                        <td class="text-center">
+                                            <a href="@Url.Action("PaymentDetails", new { paymentId = payment.PaymentID })" class="btn btn-sm btn-edit">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Failed Payments Tab -->
+    <div class="tab-pane fade" id="failed-payments">
+        @{
+            var failedPayments = Model.Where(p => p.Status == "Failed").ToList();
+        }
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #ef4444; border-radius: 12px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none;">
+                <h4 class="mb-0 text-white">
+                    <i class="bi bi-x-circle me-2"></i>Failed Payments (@failedPayments.Count)
+                </h4>
+            </div>
+            @if (!failedPayments.Any())
+            {
+                <div class="card-body text-center py-5">
+                    <p class="text-muted">No failed payments</p>
+                </div>
+            }
+            else
+            {
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-kumari mb-0">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #333;">
+                                    <th>Payment ID</th>
+                                    <th>Amount</th>
+                                    <th>Failed Date</th>
+                                    <th style="width: 100px;" class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var payment in failedPayments.OrderByDescending(p => p.PaymentDate))
+                                {
+                                    <tr>
+                                        <td><strong style="color: #ffd700;">@payment.PaymentID</strong></td>
+                                        <td><span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">₹@payment.Amount.ToString("F2")</span></td>
+                                        <td style="color: #b0b0b0;">@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
+                                        <td class="text-center">
+                                            <a href="@Url.Action("PaymentDetails", new { paymentId = payment.PaymentID })" class="btn btn-sm btn-edit">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+
+    .stat-card {
+        border: 2px solid #333333;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: #ffd700;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(229, 9, 20, 0.2);
+    }
+
+    .nav-tabs {
+        padding: 0;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        padding: 12px 16px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .nav-tabs .nav-link:hover,
+    .nav-tabs .nav-link.active {
+        border: none;
+        background: transparent;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #ffd700 !important;
+        border-bottom: 3px solid #ffd700;
+    }
+
+    .payment-card {
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    .table-kumari tbody tr {
+        border-bottom: 1px solid #333;
+    }
+
+    .table-kumari tbody tr:hover {
+        background-color: rgba(255, 215, 0, 0.05);
+    }
+</style>

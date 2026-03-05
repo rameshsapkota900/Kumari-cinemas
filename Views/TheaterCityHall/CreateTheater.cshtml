@@ -3,36 +3,133 @@
     ViewData["Title"] = "Add New Theater";
 }
 
-<div class="page-header">
-    <h2><i class="bi bi-building me-2"></i>Add New Theater</h2>
-    <p>Register a new theater location in the system</p>
+<!-- Breadcrumb -->
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background: transparent; padding: 10px 0;">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index")" style="color: #ffd700;">Theater Management</a></li>
+            <li class="breadcrumb-item active" style="color: #b0b0b0;">Add New Theater</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+        <i class="bi bi-building me-3"></i>Add New Theater
+    </h1>
+    <p style="color: #b0b0b0;">Register a new cinema location with essential information</p>
 </div>
 
 <div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="form-section">
-            <form asp-action="CreateTheater" method="post">
-                @Html.AntiForgeryToken()
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label asp-for="Name" class="form-label">Theater Name <span class="text-danger">*</span></label>
-                        <input asp-for="Name" class="form-control" maxlength="30" required />
+    <div class="col-lg-7">
+        <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none; padding: 20px;">
+                <h4 class="text-white mb-0">
+                    <i class="bi bi-star-fill me-2"></i>Theater Details
+                </h4>
+            </div>
+
+            <div class="card-body" style="padding: 30px;">
+                <form asp-action="CreateTheater" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- Theater Name -->
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label" style="color: #ffd700; font-weight: 600;">
+                            <i class="bi bi-building me-2"></i>Theater Name <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Name" 
+                               class="form-control form-control-theater" 
+                               maxlength="30" 
+                               placeholder="e.g., Cineplex Downtown"
+                               required />
+                        <small style="color: #b0b0b0;">Enter the display name for this cinema location</small>
                     </div>
-                    <div class="col-md-6">
-                        <label asp-for="City" class="form-label">City <span class="text-danger">*</span></label>
-                        <input asp-for="City" class="form-control" maxlength="20" required />
+
+                    <!-- City -->
+                    <div class="mb-4">
+                        <label asp-for="City" class="form-label" style="color: #ffd700; font-weight: 600;">
+                            <i class="bi bi-geo-alt me-2"></i>City <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="City" 
+                               class="form-control form-control-theater" 
+                               maxlength="20" 
+                               placeholder="e.g., New York"
+                               required />
+                        <small style="color: #b0b0b0;">City where the theater is located</small>
                     </div>
-                    <div class="col-md-6">
-                        <label asp-for="Address" class="form-label">Address <span class="text-danger">*</span></label>
-                        <input asp-for="Address" class="form-control" maxlength="50" required />
+
+                    <!-- Address -->
+                    <div class="mb-4">
+                        <label asp-for="Address" class="form-label" style="color: #ffd700; font-weight: 600;">
+                            <i class="bi bi-map me-2"></i>Address <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Address" 
+                               class="form-control form-control-theater" 
+                               maxlength="50" 
+                               placeholder="Street address and building number"
+                               required />
+                        <small style="color: #b0b0b0;">Complete street address for the location</small>
                     </div>
-                </div>
-                <hr />
-                <div class="d-flex justify-content-between">
-                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
-                    <button type="submit" class="btn btn-kumari"><i class="bi bi-check-circle me-2"></i>Create Theater</button>
-                </div>
-            </form>
+
+                    <!-- Info Box -->
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 24px;">
+                        <i class="bi bi-info-circle" style="color: #10b981; margin-right: 8px;"></i>
+                        <small style="color: #10b981;">
+                            <strong>Tip:</strong> After creating the theater, you'll be able to add screening halls and configure seating arrangements.
+                        </small>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex gap-3 pt-3 border-top" style="border-color: #333;">
+                        <a asp-action="Index" class="btn btn-outline-secondary" style="border-color: #666; color: #b0b0b0;">
+                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-kumari ms-auto" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none; padding: 10px 24px;">
+                            <i class="bi bi-check-circle me-2"></i>Create Theater
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .form-control-theater {
+        background: #1a1f2e;
+        border: 1px solid #444;
+        color: #f0f0f0;
+        padding: 10px 12px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-theater:focus {
+        background: #1a1f2e;
+        border-color: #ffd700;
+        color: #f0f0f0;
+        box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+    }
+
+    .form-control-theater::placeholder {
+        color: #666;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+
+    .breadcrumb-item a {
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #fff !important;
+    }
+</style>

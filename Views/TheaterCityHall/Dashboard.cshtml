@@ -1,0 +1,326 @@
+@model TheaterCityHallViewModel
+@{
+    ViewData["Title"] = "Theater Dashboard";
+}
+
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                <i class="bi bi-graph-up me-3"></i>Theater Operations Dashboard
+            </h1>
+            <p style="color: #b0b0b0; font-size: 16px;">Real-time analytics and occupancy overview</p>
+        </div>
+    </div>
+</div>
+
+<!-- Key Metrics Row 1 -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%);">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Total Theaters</div>
+                <div class="metric-value">@Model.Theaters.Count</div>
+                <div class="metric-trend">📍 Active Locations</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <i class="bi bi-door-open"></i>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Screening Halls</div>
+                <div class="metric-value">@Model.Halls.Count</div>
+                <div class="metric-trend">🎬 Active Screens</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                <i class="bi bi-chairs"></i>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Total Seats</div>
+                <div class="metric-value">@Model.Halls.Sum(h => h.Capacity)</div>
+                <div class="metric-trend">💺 Available</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Avg. Occupancy</div>
+                <div class="metric-value">@(Model.Halls.Count > 0 ? ((int)(Model.Halls.Average(h => (h.Capacity * 0.65)))) : 0)%</div>
+                <div class="metric-trend">📊 This Month</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Theater Details Grid -->
+<div class="card theater-management-card mb-5">
+    <div class="card-header" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+        <h4 class="mb-0 text-white">
+            <i class="bi bi-building me-2"></i>Theater Network Overview
+        </h4>
+    </div>
+
+    @if (!Model.Theaters.Any())
+    {
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 48px; color: #666;"></i>
+            <p class="text-muted mt-3">No theaters configured yet. <a href="@Url.Action("CreateTheater")" style="color: #ffd700;">Add a theater</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="card-body p-0">
+            <div class="row g-0">
+                @foreach (var theater in Model.Theaters)
+                {
+                    var hallsInTheater = Model.Halls.Where(h => h.TheaterID == theater.TheaterID).ToList();
+                    var totalCapacity = hallsInTheater.Sum(h => h.Capacity);
+
+                    <div class="col-lg-6 p-3" style="border-bottom: 1px solid #333;">
+                        <div style="background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); padding: 16px; border-radius: 8px; border-left: 3px solid #e50914;">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 style="color: #ffd700; margin: 0;">@theater.Name</h6>
+                                    <small style="color: #b0b0b0;"><i class="bi bi-geo-alt me-1"></i>@theater.City</small>
+                                </div>
+                                <span class="badge" style="background: #e50914; color: white;">@hallsInTheater.Count halls</span>
+                            </div>
+                            <small style="color: #b0b0b0;">@theater.Address</small>
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #333; display: flex; gap: 12px;">
+                                <div>
+                                    <small style="color: #b0b0b0;">Total Capacity</small>
+                                    <div style="color: #ffd700; font-weight: 600;">@totalCapacity seats</div>
+                                </div>
+                                <div>
+                                    <small style="color: #b0b0b0;">Occupancy</small>
+                                    <div style="color: #10b981; font-weight: 600;">@(totalCapacity > 0 ? "~65%" : "0%")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Hall Status Cards -->
+<div class="card theater-management-card">
+    <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+        <h4 class="mb-0 text-white">
+            <i class="bi bi-door-open me-2"></i>Hall Status & Occupancy
+        </h4>
+    </div>
+
+    @if (!Model.Halls.Any())
+    {
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 48px; color: #666;"></i>
+            <p class="text-muted mt-3">No halls configured yet. <a href="@Url.Action("CreateHall")" style="color: #ffd700;">Add a hall</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-kumari table-hover mb-0">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #333;">
+                            <th>Hall Name</th>
+                            <th>Theater</th>
+                            <th>Capacity</th>
+                            <th>Occupancy Rate</th>
+                            <th>Status</th>
+                            <th style="width: 100px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var hall in Model.Halls)
+                        {
+                            var occupancyRate = 65; // Mock occupancy rate
+                            var statusColor = occupancyRate > 80 ? "#ef4444" : (occupancyRate > 50 ? "#f59e0b" : "#10b981");
+
+                            <tr>
+                                <td>
+                                    <strong style="color: #f0f0f0;">
+                                        <i class="bi bi-film" style="color: #10b981; margin-right: 6px;"></i>@hall.HallName
+                                    </strong>
+                                </td>
+                                <td style="color: #b0b0b0;">@hall.TheaterName</td>
+                                <td>
+                                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;">
+                                        @hall.Capacity seats
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 100px; height: 6px; background: #333; border-radius: 3px; overflow: hidden;">
+                                            <div style="width: @occupancyRate%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);"></div>
+                                        </div>
+                                        <small style="color: #ffd700; font-weight: 600;">@occupancyRate%</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (occupancyRate > 80)
+                                    {
+                                        <span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                            <i class="bi bi-exclamation-circle me-1"></i>High Occupancy
+                                        </span>
+                                    }
+                                    else if (occupancyRate > 50)
+                                    {
+                                        <span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                            <i class="bi bi-info-circle me-1"></i>Normal
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                            <i class="bi bi-check-circle me-1"></i>Available
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="EditHall" asp-route-id="@hall.HallID" class="btn btn-sm btn-edit" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .metric-card {
+        background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%);
+        border: 2px solid #333333;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        gap: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+        border-color: #ffd700;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(229, 9, 20, 0.2);
+    }
+
+    .metric-icon {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 28px;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .metric-content {
+        flex: 1;
+    }
+
+    .metric-label {
+        font-size: 12px;
+        color: #b0b0b0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    .metric-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #ffd700;
+        margin: 4px 0;
+    }
+
+    .metric-trend {
+        font-size: 12px;
+        color: #b0b0b0;
+        margin-top: 4px;
+    }
+
+    .theater-management-card {
+        background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%);
+        border: 2px solid #333333;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .theater-management-card:hover {
+        border-color: #ffd700;
+        box-shadow: 0 10px 30px rgba(229, 9, 20, 0.2);
+    }
+
+    .theater-management-card .card-header {
+        padding: 16px 20px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid #333333;
+    }
+
+    .table-kumari tbody tr {
+        border-bottom: 1px solid #333333;
+    }
+
+    .table-kumari tbody tr:hover {
+        background-color: rgba(255, 215, 0, 0.05);
+    }
+
+    @media (max-width: 768px) {
+        .metric-card {
+            flex-direction: column;
+        }
+
+        .metric-icon {
+            width: 100%;
+            height: 50px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+        }
+    }
+</style>

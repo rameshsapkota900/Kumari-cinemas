@@ -1142,5 +1142,259 @@ namespace Kumari_cinemas.Data
             var result = cmd.ExecuteScalar();
             return result == null ? 0 : Convert.ToInt32(result);
         }
+
+        // ======================================================================
+        // BROWSE CONTROLLER HELPER METHODS - Customer Booking Interface
+        // ======================================================================
+
+        public List<dynamic> GetTheaterHallsForBrowse(int theaterId)
+        {
+            var halls = new List<dynamic>();
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"SELECT h.HallID, h.HallName, h.Capacity, 
+                         (SELECT COUNT(*) FROM Shows WHERE HallID = h.HallID AND ShowDate >= SYSDATE) AS UpcomingShows
+                  FROM Halls h
+                  WHERE h.TheaterID = :tid
+                  ORDER BY h.HallName", conn);
+            cmd.Parameters.Add(new OracleParameter("tid", theaterId));
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                halls.Add(new
+                {
+                    HallID = Convert.ToInt32(reader["HallID"]),
+                    HallName = reader["HallName"].ToString(),
+                    Capacity = Convert.ToInt32(reader["Capacity"]),
+                    UpcomingShows = Convert.ToInt32(reader["UpcomingShows"])
+                });
+            }
+            return halls;
+        }
+
+        public List<dynamic> GetHallSeatsWithStatus(int showId)
+        {
+            var seats = new List<dynamic>();
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"SELECT s.SeatID, s.SeatNumber, s.TicketPriceID, tp.Category, tp.Price,
+                         CASE WHEN t.TicketID IS NULL THEN 'Available' ELSE 'Booked' END AS Status
+                  FROM Seats s
+                  JOIN TicketPrices tp ON s.TicketPriceID = tp.TicketPriceID
+                  LEFT JOIN Booking_Ticket bt ON s.HallID = (SELECT HallID FROM Shows WHERE ShowID = :sid)
+                  LEFT JOIN Tickets t ON bt.TicketID = t.TicketID AND t.SeatID = s.SeatID
+                  WHERE s.HallID = (SELECT HallID FROM Shows WHERE ShowID = :sid)
+                  ORDER BY s.SeatNumber", conn);
+            cmd.Parameters.Add(new OracleParameter("sid", showId));
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                seats.Add(new
+                {
+                    SeatID = Convert.ToInt32(reader["SeatID"]),
+                    SeatNumber = reader["SeatNumber"].ToString(),
+                    TicketPriceID = Convert.ToInt32(reader["TicketPriceID"]),
+                    Category = reader["Category"].ToString(),
+                    Price = Convert.ToDecimal(reader["Price"]),
+                    Status = reader["Status"].ToString()
+                });
+            }
+            return seats;
+        }
+
+        public List<dynamic> GetSeatsByIds(List<int> seatIds)
+        {
+            var seats = new List<dynamic>();
+            if (seatIds == null || seatIds.Count == 0) return seats;
+
+            using var conn = GetConnection();
+            conn.Open();
+            
+            foreach (var seatId in seatIds)
+            {
+                using var cmd = new OracleCommand(
+                    @"SELECT s.SeatID, s.SeatNumber, s.TicketPriceID, tp.Category, tp.Price
+                      FROM Seats s
+                      JOIN TicketPrices tp ON s.TicketPriceID = tp.TicketPriceID
+                      WHERE s.SeatID = :sid", conn);
+                cmd.Parameters.Add(new OracleParameter("sid", seatId));
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    seats.Add(new
+                    {
+                        SeatID = Convert.ToInt32(reader["SeatID"]),
+                        SeatNumber = reader["SeatNumber"].ToString(),
+                        TicketPriceID = Convert.ToInt32(reader["TicketPriceID"]),
+                        Category = reader["Category"].ToString(),
+                        Price = Convert.ToDecimal(reader["Price"])
+                    });
+                }
+            }
+            return seats;
+        }
+
+        public int CreateBooking(int userId, decimal totalAmount, string paymentStatus)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"INSERT INTO Booking (UserID, BookingDate, TotalAmount) 
+                  VALUES (:uid, SYSDATE, :total)", conn);
+            cmd.Parameters.Add(new OracleParameter("uid", userId));
+            cmd.Parameters.Add(new OracleParameter("total", totalAmount));
+            cmd.ExecuteNonQuery();
+            
+            using var getIdCmd = new OracleCommand("SELECT MAX(BookingID) FROM Booking WHERE UserID = :uid", conn);
+            getIdCmd.Parameters.Add(new OracleParameter("uid", userId));
+            var result = getIdCmd.ExecuteScalar();
+            return Convert.ToInt32(result);
+        }
+
+        public void CreateTicket(int bookingId, int showId, string seatNumber)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"INSERT INTO Tickets (SeatID, TicketPriceID, IssueDate)
+                  SELECT s.SeatID, s.TicketPriceID, SYSDATE
+                  FROM Seats s
+                  WHERE s.SeatNumber = :sn AND s.HallID = (SELECT HallID FROM Shows WHERE ShowID = :sid)", conn);
+            cmd.Parameters.Add(new OracleParameter("sn", seatNumber));
+            cmd.Parameters.Add(new OracleParameter("sid", showId));
+            cmd.ExecuteNonQuery();
+        }
+
+        public int CreatePayment(int bookingId, decimal amount, string status, string paymentMethod)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"INSERT INTO Payments (BookingID, Amount, Status, PaymentMethod, PaymentDate)
+                  VALUES (:bid, :amt, :status, :method, SYSDATE)", conn);
+            cmd.Parameters.Add(new OracleParameter("bid", bookingId));
+            cmd.Parameters.Add(new OracleParameter("amt", amount));
+            cmd.Parameters.Add(new OracleParameter("status", status));
+            cmd.Parameters.Add(new OracleParameter("method", paymentMethod));
+            cmd.ExecuteNonQuery();
+
+            using var getIdCmd = new OracleCommand("SELECT MAX(PaymentID) FROM Payments WHERE BookingID = :bid", conn);
+            getIdCmd.Parameters.Add(new OracleParameter("bid", bookingId));
+            var result = getIdCmd.ExecuteScalar();
+            return Convert.ToInt32(result);
+        }
+
+        public dynamic GetBookingById(int bookingId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"SELECT b.BookingID, b.UserID, b.BookingDate, b.TotalAmount, p.Status, p.PaymentMethod
+                  FROM Booking b
+                  LEFT JOIN Payments p ON b.BookingID = p.BookingID
+                  WHERE b.BookingID = :bid", conn);
+            cmd.Parameters.Add(new OracleParameter("bid", bookingId));
+            using var reader = cmd.ExecuteReader();
+            if (reader.Read())
+            {
+                return new
+                {
+                    BookingID = Convert.ToInt32(reader["BookingID"]),
+                    UserID = Convert.ToInt32(reader["UserID"]),
+                    BookingDate = Convert.ToDateTime(reader["BookingDate"]),
+                    TotalAmount = Convert.ToDecimal(reader["TotalAmount"]),
+                    PaymentStatus = reader["Status"].ToString() ?? "Pending",
+                    PaymentMethod = reader["PaymentMethod"].ToString() ?? "N/A"
+                };
+            }
+            return null;
+        }
+
+        public List<dynamic> GetBookingTickets(int bookingId)
+        {
+            var tickets = new List<dynamic>();
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"SELECT t.TicketID, s.SeatNumber, tp.Category, tp.Price, m.Title, sh.ShowDate, sh.ShowTime
+                  FROM Booking_Ticket bt
+                  JOIN Tickets t ON bt.TicketID = t.TicketID
+                  JOIN Seats s ON t.SeatID = s.SeatID
+                  JOIN TicketPrices tp ON t.TicketPriceID = tp.TicketPriceID
+                  JOIN Shows sh ON bt.ShowID = sh.ShowID
+                  JOIN Movies m ON sh.MovieID = m.MovieID
+                  WHERE bt.BookingID = :bid", conn);
+            cmd.Parameters.Add(new OracleParameter("bid", bookingId));
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                tickets.Add(new
+                {
+                    TicketID = Convert.ToInt32(reader["TicketID"]),
+                    SeatNumber = reader["SeatNumber"].ToString(),
+                    Category = reader["Category"].ToString(),
+                    Price = Convert.ToDecimal(reader["Price"]),
+                    MovieTitle = reader["Title"].ToString(),
+                    ShowDate = Convert.ToDateTime(reader["ShowDate"]),
+                    ShowTime = reader["ShowTime"].ToString()
+                });
+            }
+            return tickets;
+        }
+
+        public List<dynamic> GetUserBookingsForBrowse(int userId)
+        {
+            var bookings = new List<dynamic>();
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"SELECT b.BookingID, b.BookingDate, b.TotalAmount, p.Status,
+                         COUNT(t.TicketID) AS TicketCount, 
+                         MAX(sh.ShowDate) AS LastShowDate
+                  FROM Booking b
+                  LEFT JOIN Payments p ON b.BookingID = p.BookingID
+                  LEFT JOIN Booking_Ticket bt ON b.BookingID = bt.BookingID
+                  LEFT JOIN Tickets t ON bt.TicketID = t.TicketID
+                  LEFT JOIN Shows sh ON bt.ShowID = sh.ShowID
+                  WHERE b.UserID = :uid
+                  GROUP BY b.BookingID, b.BookingDate, b.TotalAmount, p.Status
+                  ORDER BY b.BookingDate DESC", conn);
+            cmd.Parameters.Add(new OracleParameter("uid", userId));
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                bookings.Add(new
+                {
+                    BookingID = Convert.ToInt32(reader["BookingID"]),
+                    BookingDate = Convert.ToDateTime(reader["BookingDate"]),
+                    TotalAmount = Convert.ToDecimal(reader["TotalAmount"]),
+                    PaymentStatus = reader["Status"].ToString() ?? "Pending",
+                    TicketCount = reader["TicketCount"] == DBNull.Value ? 0 : Convert.ToInt32(reader["TicketCount"]),
+                    LastShowDate = reader["LastShowDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["LastShowDate"])
+                });
+            }
+            return bookings;
+        }
+
+        public List<dynamic> GetTicketPrices()
+        {
+            var prices = new List<dynamic>();
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand("SELECT TicketPriceID, Category, Price FROM TicketPrices ORDER BY Price DESC", conn);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                prices.Add(new
+                {
+                    TicketPriceID = Convert.ToInt32(reader["TicketPriceID"]),
+                    Category = reader["Category"].ToString(),
+                    Price = Convert.ToDecimal(reader["Price"])
+                });
+            }
+            return prices;
+        }
     }
 }
