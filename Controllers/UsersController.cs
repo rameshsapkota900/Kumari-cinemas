@@ -83,6 +83,14 @@ namespace Kumari_cinemas.Controllers
         {
             try
             {
+                // Check if user has any bookings (foreign key constraint)
+                var userBookings = _db.GetUserBookings(id);
+                if (userBookings > 0)
+                {
+                    TempData["Error"] = $"Cannot delete user: User has {userBookings} active booking(s). Please cancel bookings first.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _db.DeleteUser(id);
                 TempData["Success"] = $"User (ID: {id}) deleted successfully.";
                 return RedirectToAction(nameof(Index));

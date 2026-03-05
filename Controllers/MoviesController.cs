@@ -72,6 +72,14 @@ namespace Kumari_cinemas.Controllers
         {
             try
             {
+                // Check if movie has any shows scheduled (foreign key constraint)
+                var shows = _db.GetMovieShows(id);
+                if (shows > 0)
+                {
+                    TempData["Error"] = $"Cannot delete movie: Movie has {shows} show(s) scheduled. Please cancel shows first.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _db.DeleteMovie(id);
                 TempData["Success"] = $"Movie (ID: {id}) deleted successfully.";
             }

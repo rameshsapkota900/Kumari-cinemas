@@ -1,4 +1,4 @@
-﻿using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using Kumari_cinemas.Models;
 using Kumari_cinemas.Models.ViewModels;
@@ -854,14 +854,16 @@ namespace Kumari_cinemas.Data
                          sh.ShowDate, sh.ShowTime, m.Title AS MovieTitle
                   FROM Users u
                   JOIN Booking b ON u.UserID = b.UserID
+                  JOIN Payments p ON b.PaymentID = p.PaymentID
                   JOIN Booking_Ticket bt ON b.BookingID = bt.BookingID
-                  JOIN Tickets tk ON bt.TicketID = tk.TicketID
+                  JOIN Tickets tk ON bt.TicketID = tk.TicketID AND tk.CancellationID IS NULL
                   JOIN Shows sh ON bt.ShowID = sh.ShowID
                   JOIN Movies m ON sh.MovieID = m.MovieID
                   JOIN Seats s ON tk.SeatID = s.SeatID
                   JOIN TicketPrices tp ON tk.TicketPriceID = tp.TicketPriceID
                   WHERE u.UserID = :userId
                   AND tk.IssueDate >= ADD_MONTHS(SYSDATE, -6)
+                  AND p.Status IN ('Paid', 'Completed')
                   ORDER BY tk.IssueDate DESC", conn);
             cmd.Parameters.Add(new OracleParameter("userId", userId));
             using var reader = cmd.ExecuteReader();
@@ -870,15 +872,15 @@ namespace Kumari_cinemas.Data
                 vm.Tickets.Add(new UserTicketDetail
                 {
                     TicketID = Convert.ToInt32(reader["TicketID"]),
-                    IssueDate = Convert.ToDateTime(reader["IssueDate"]),
-                    Price = Convert.ToDecimal(reader["Price"]),
-                    Category = reader["Category"].ToString()!,
-                    SeatNumber = reader["SeatNumber"].ToString()!,
+                    IssueDate = reader["IssueDate"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(reader["IssueDate"]),
+                    Price = reader["Price"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["Price"]),
+                    Category = reader["Category"].ToString() ?? "Standard",
+                    SeatNumber = reader["SeatNumber"].ToString() ?? "N/A",
                     BookingID = Convert.ToInt32(reader["BookingID"]),
-                    BookingDate = Convert.ToDateTime(reader["BookingDate"]),
-                    ShowDate = Convert.ToDateTime(reader["ShowDate"]),
-                    ShowTime = reader["ShowTime"].ToString()!,
-                    MovieTitle = reader["MovieTitle"].ToString()!
+                    BookingDate = reader["BookingDate"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(reader["BookingDate"]),
+                    ShowDate = reader["ShowDate"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(reader["ShowDate"]),
+                    ShowTime = reader["ShowTime"].ToString() ?? "N/A",
+                    MovieTitle = reader["MovieTitle"].ToString() ?? "Unknown Movie"
                 });
             }
             return vm;
@@ -897,48 +899,50 @@ namespace Kumari_cinemas.Data
                 MovieShows = new List<MovieShowDetail>()
             };
 
-            using var conn = GetConnection();
-            conn.Open();
-            using var cmd = new OracleCommand(
-                @"SELECT t.TheaterID, t.Name AS TheaterName, t.City, t.Address,
-                         h.HallID, h.HallName, h.Capacity,
-                         m.MovieID, m.Title, m.Duration, m.Language, m.Genre, m.ReleaseDate,
-                         sh.ShowID, sh.ShowDate, sh.ShowTime, sh.ShowStatus
-                  FROM Theaters t
-                  JOIN Halls h ON t.TheaterID = h.TheaterID
-                  JOIN Shows sh ON h.HallID = sh.HallID
-                  JOIN Movies m ON sh.MovieID = m.MovieID
-                  WHERE h.HallID = :hallId
-                  ORDER BY sh.ShowDate, sh.ShowTime", conn);
-            cmd.Parameters.Add(new OracleParameter("hallId", hallId));
-            using var reader = cmd.ExecuteReader();
-            bool first = true;
-            while (reader.Read())
+            // First, get hall information
+            var hall = GetHallById(hallId);
+            if (hall != null)
             {
-                if (first)
+                var theater = GetTheaterById(hall.TheaterID);
+                if (theater != null)
                 {
                     vm.TheaterCityHallInfo = new TheaterCityHallInfo
                     {
-                        TheaterName = reader["TheaterName"].ToString()!,
-                        City = reader["City"].ToString()!,
-                        Address = reader["Address"].ToString()!,
-                        HallName = reader["HallName"].ToString()!,
-                        Capacity = Convert.ToInt32(reader["Capacity"])
+                        TheaterName = theater.Name,
+                        City = theater.City,
+                        Address = theater.Address,
+                        HallName = hall.HallName,
+                        Capacity = hall.Capacity
                     };
-                    first = false;
                 }
+            }
+
+            // Then get shows for this hall (may be empty)
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand(
+                @"SELECT m.MovieID, m.Title, m.Duration, m.Language, m.Genre, m.ReleaseDate,
+                         sh.ShowID, sh.ShowDate, sh.ShowTime, sh.ShowStatus
+                  FROM Shows sh
+                  JOIN Movies m ON sh.MovieID = m.MovieID
+                  WHERE sh.HallID = :hallId
+                  ORDER BY sh.ShowDate, sh.ShowTime", conn);
+            cmd.Parameters.Add(new OracleParameter("hallId", hallId));
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
                 vm.MovieShows.Add(new MovieShowDetail
                 {
                     MovieID = Convert.ToInt32(reader["MovieID"]),
-                    Title = reader["Title"].ToString()!,
-                    Duration = Convert.ToInt32(reader["Duration"]),
-                    Language = reader["Language"].ToString()!,
-                    Genre = reader["Genre"].ToString()!,
-                    ReleaseDate = Convert.ToDateTime(reader["ReleaseDate"]),
+                    Title = reader["Title"].ToString() ?? "Unknown",
+                    Duration = reader["Duration"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Duration"]),
+                    Language = reader["Language"].ToString() ?? "N/A",
+                    Genre = reader["Genre"].ToString() ?? "N/A",
+                    ReleaseDate = reader["ReleaseDate"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(reader["ReleaseDate"]),
                     ShowID = Convert.ToInt32(reader["ShowID"]),
-                    ShowDate = Convert.ToDateTime(reader["ShowDate"]),
-                    ShowTime = reader["ShowTime"].ToString()!,
-                    ShowStatus = reader["ShowStatus"].ToString()!
+                    ShowDate = reader["ShowDate"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(reader["ShowDate"]),
+                    ShowTime = reader["ShowTime"].ToString() ?? "N/A",
+                    ShowStatus = reader["ShowStatus"].ToString() ?? "Pending"
                 });
             }
             return vm;
@@ -964,8 +968,11 @@ namespace Kumari_cinemas.Data
                 @"SELECT * FROM (
                       SELECT t.TheaterID, t.Name AS TheaterName, t.City, t.Address,
                              h.HallID, h.HallName, h.Capacity,
-                             COUNT(tk.TicketID) AS PaidTickets,
-                             ROUND(COUNT(tk.TicketID) * 100.0 / h.Capacity, 2) AS OccupancyPct
+                             COUNT(CASE WHEN p.PaymentID IS NOT NULL AND p.Status IN ('Paid', 'Completed') THEN tk.TicketID ELSE NULL END) AS PaidTickets,
+                             CASE 
+                                WHEN h.Capacity > 0 THEN ROUND(COUNT(CASE WHEN p.PaymentID IS NOT NULL AND p.Status IN ('Paid', 'Completed') THEN tk.TicketID ELSE NULL END) * 100.0 / h.Capacity, 2)
+                                ELSE 0
+                             END AS OccupancyPct
                       FROM Movies m
                       JOIN Shows sh ON m.MovieID = sh.MovieID
                       JOIN Halls h ON sh.HallID = h.HallID
@@ -973,9 +980,8 @@ namespace Kumari_cinemas.Data
                       LEFT JOIN Booking_Ticket bt ON sh.ShowID = bt.ShowID
                       LEFT JOIN Tickets tk ON bt.TicketID = tk.TicketID
                       LEFT JOIN Booking bk ON bt.BookingID = bk.BookingID
-                      LEFT JOIN Payments p ON bk.PaymentID = p.PaymentID
+                      LEFT JOIN Payments p ON bk.PaymentID = p.PaymentID AND p.Status IN ('Paid', 'Completed')
                       WHERE m.MovieID = :movieId
-                      AND p.Status = 'Paid'
                       GROUP BY t.TheaterID, t.Name, t.City, t.Address, h.HallID, h.HallName, h.Capacity
                       ORDER BY OccupancyPct DESC
                   ) WHERE ROWNUM <= 3", conn);
@@ -986,14 +992,14 @@ namespace Kumari_cinemas.Data
                 vm.TopTheaters.Add(new OccupancyDetail
                 {
                     TheaterID = Convert.ToInt32(reader["TheaterID"]),
-                    TheaterName = reader["TheaterName"].ToString()!,
-                    City = reader["City"].ToString()!,
-                    Address = reader["Address"].ToString()!,
+                    TheaterName = reader["TheaterName"].ToString() ?? "Unknown Theater",
+                    City = reader["City"].ToString() ?? "Unknown City",
+                    Address = reader["Address"].ToString() ?? "Unknown Address",
                     HallID = Convert.ToInt32(reader["HallID"]),
-                    HallName = reader["HallName"].ToString()!,
+                    HallName = reader["HallName"].ToString() ?? "Unknown Hall",
                     Capacity = Convert.ToInt32(reader["Capacity"]),
-                    PaidTickets = Convert.ToInt32(reader["PaidTickets"]),
-                    OccupancyPercentage = Convert.ToDecimal(reader["OccupancyPct"])
+                    PaidTickets = reader["PaidTickets"] == DBNull.Value ? 0 : Convert.ToInt32(reader["PaidTickets"]),
+                    OccupancyPercentage = reader["OccupancyPct"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["OccupancyPct"])
                 });
             }
             return vm;
@@ -1081,6 +1087,60 @@ namespace Kumari_cinemas.Data
             using var cmd = new OracleCommand(sql, conn);
             var result = cmd.ExecuteScalar();
             return Convert.ToDecimal(result);
+        }
+
+        // ======================================================================
+        // DATA INTEGRITY CHECKS - Prevent deletion of records with dependencies
+        // ======================================================================
+
+        public int GetUserBookings(int userId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand("SELECT COUNT(*) FROM Booking WHERE UserID = :uid", conn);
+            cmd.Parameters.Add(new OracleParameter("uid", userId));
+            var result = cmd.ExecuteScalar();
+            return result == null ? 0 : Convert.ToInt32(result);
+        }
+
+        public int GetTheaterHalls(int theaterId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand("SELECT COUNT(*) FROM Halls WHERE TheaterID = :tid", conn);
+            cmd.Parameters.Add(new OracleParameter("tid", theaterId));
+            var result = cmd.ExecuteScalar();
+            return result == null ? 0 : Convert.ToInt32(result);
+        }
+
+        public int GetHallShows(int hallId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand("SELECT COUNT(*) FROM Shows WHERE HallID = :hid", conn);
+            cmd.Parameters.Add(new OracleParameter("hid", hallId));
+            var result = cmd.ExecuteScalar();
+            return result == null ? 0 : Convert.ToInt32(result);
+        }
+
+        public int GetMovieShows(int movieId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand("SELECT COUNT(*) FROM Shows WHERE MovieID = :mid", conn);
+            cmd.Parameters.Add(new OracleParameter("mid", movieId));
+            var result = cmd.ExecuteScalar();
+            return result == null ? 0 : Convert.ToInt32(result);
+        }
+
+        public int GetHallSeats(int hallId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            using var cmd = new OracleCommand("SELECT COUNT(*) FROM Seats WHERE HallID = :hid", conn);
+            cmd.Parameters.Add(new OracleParameter("hid", hallId));
+            var result = cmd.ExecuteScalar();
+            return result == null ? 0 : Convert.ToInt32(result);
         }
     }
 }

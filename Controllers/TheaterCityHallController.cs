@@ -81,6 +81,14 @@ namespace Kumari_cinemas.Controllers
         {
             try
             {
+                // Check if theater has any halls (foreign key constraint)
+                var halls = _db.GetTheaterHalls(id);
+                if (halls > 0)
+                {
+                    TempData["Error"] = $"Cannot delete theater: Theater has {halls} hall(s). Please delete halls first.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _db.DeleteTheater(id);
                 TempData["Success"] = $"Theater (ID: {id}) deleted successfully.";
             }
@@ -153,6 +161,22 @@ namespace Kumari_cinemas.Controllers
         {
             try
             {
+                // Check if hall has any shows (foreign key constraint)
+                var shows = _db.GetHallShows(id);
+                if (shows > 0)
+                {
+                    TempData["Error"] = $"Cannot delete hall: Hall has {shows} show(s). Please cancel shows first.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Check if hall has any seats (foreign key constraint)
+                var seats = _db.GetHallSeats(id);
+                if (seats > 0)
+                {
+                    TempData["Error"] = $"Cannot delete hall: Hall has {seats} seat(s) configured. Please delete seats first.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _db.DeleteHall(id);
                 TempData["Success"] = $"Hall (ID: {id}) deleted successfully.";
             }
