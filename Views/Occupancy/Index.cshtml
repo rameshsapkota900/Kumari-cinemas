@@ -3,18 +3,23 @@
     ViewData["Title"] = "Theater Occupancy Analytics";
 }
 
-<div class="page-header">
-    <h2><i class="bi bi-bar-chart me-2"></i>Theater Occupancy Analytics</h2>
-    <p>Top 3 theaters by seat occupancy for a selected movie (paid tickets only)</p>
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+        <i class="bi bi-bar-chart me-3"></i>Theater Occupancy Analytics
+    </h1>
+    <p style="color: #b0b0b0;">Analyze seat occupancy for each movie across all theater locations (paid tickets only)</p>
 </div>
 
-<!-- Movie Selection -->
-<div class="filter-section mb-4">
+<!-- Movie Selection Filter -->
+<div class="filter-card mb-5" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px; padding: 24px;">
     <form method="get" class="row align-items-end g-3">
-        <div class="col-md-6">
-            <label class="form-label fw-bold"><i class="bi bi-film me-1"></i>Select Movie</label>
-            <select name="movieId" class="form-select" onchange="this.form.submit()">
-                <option value="">-- Select a Movie to view Top 3 Theaters --</option>
+        <div class="col-md-7">
+            <label class="form-label" style="color: #ffd700; font-weight: 600;">
+                <i class="bi bi-film me-2"></i>Select Movie for Analysis
+            </label>
+            <select name="movieId" class="form-select form-select-cinema" onchange="this.form.submit()">
+                <option value="">-- Choose a Movie --</option>
                 @foreach (var m in Model.AllMovies)
                 {
                     <option value="@m.MovieID" selected="@(Model.SelectedMovieId == m.MovieID ? "selected" : null)">
@@ -22,12 +27,15 @@
                     </option>
                 }
             </select>
+            <small style="color: #b0b0b0;">Select a movie to view top 3 performing theaters</small>
         </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-kumari w-100"><i class="bi bi-search me-2"></i>Analyze</button>
-        </div>
-        <div class="col-md-3">
-            <a asp-action="Index" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle me-2"></i>Clear</a>
+        <div class="col-md-5 d-flex gap-2">
+            <button type="submit" class="btn btn-kumari flex-grow-1" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+                <i class="bi bi-search me-2"></i>Analyze Occupancy
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary" style="border-color: #666; color: #b0b0b0; padding: 10px 20px;">
+                <i class="bi bi-x-circle me-2"></i>Clear
+            </a>
         </div>
     </form>
 </div>
@@ -35,52 +43,90 @@
 @if (Model.SelectedMovieId.HasValue && Model.SelectedMovie != null)
 {
     <!-- Movie Info -->
-    <div class="card mb-4" style="border-left: 4px solid #e50914;">
-        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-film me-2"></i>Selected Movie</h5></div>
+    <div class="card mb-5" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-left: 4px solid #e50914; border-radius: 12px;">
+        <div class="card-header" style="background: transparent; border-bottom: 1px solid #333;">
+            <h4 class="mb-0" style="color: #ffd700;">
+                <i class="bi bi-film me-2"></i>Movie Details
+            </h4>
+        </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3"><strong>Title:</strong> @Model.SelectedMovie.Title</div>
-                <div class="col-md-2"><strong>Genre:</strong> <span class="badge bg-info">@Model.SelectedMovie.Genre</span></div>
-                <div class="col-md-2"><strong>Language:</strong> @Model.SelectedMovie.Language</div>
-                <div class="col-md-3"><strong>Analysis:</strong> <span class="badge bg-danger">Top 3 Theaters by Occupancy %</span></div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Movie Title</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 18px; margin-top: 4px;">@Model.SelectedMovie.Title</div>
+                </div>
+                <div class="col-md-4">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Genre</div>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; font-size: 12px; padding: 4px 8px;">@Model.SelectedMovie.Genre</span>
+                </div>
+                <div class="col-md-4">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Language</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 14px; margin-top: 4px;">@Model.SelectedMovie.Language</div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Occupancy Results -->
-    <div class="card">
-        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Top 3 Theater/Hall Occupancy (Paid Tickets Only)</h5></div>
+    <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+        <div class="card-header" style="background: linear-gradient(135deg, #ffd700 0%, #daa520 100%); border: none;">
+            <h4 class="mb-0" style="color: #1a1a2e;">
+                <i class="bi bi-trophy me-2"></i>Top 3 Theater/Hall Occupancy (Paid Tickets Only)
+            </h4>
+        </div>
         <div class="card-body">
             @if (Model.TopTheaters.Any())
             {
                 int rank = 1;
                 @foreach (var r in Model.TopTheaters)
                 {
-                    <div class="occupancy-bar mb-4 p-3 rounded" style="background: #f8f9fa; border-left: 4px solid @(rank == 1 ? "#ffd700" : rank == 2 ? "#c0c0c0" : "#cd7f32");">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                    var medalColor = rank == 1 ? "#ffd700" : rank == 2 ? "#c0c0c0" : "#cd7f32";
+                    var medalBgColor = rank == 1 ? "rgba(255, 215, 0, 0.1)" : rank == 2 ? "rgba(192, 192, 192, 0.1)" : "rgba(205, 127, 50, 0.1)";
+                    var occupancyColor = r.OccupancyPercentage >= 80 ? "#10b981" : r.OccupancyPercentage >= 50 ? "#3b82f6" : "#f59e0b";
+
+                    <div class="occupancy-bar mb-4 p-4 rounded" style="background: @medalBgColor; border-left: 5px solid @medalColor; border-radius: 12px;">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <span class="badge @(rank == 1 ? "bg-warning text-dark" : rank == 2 ? "bg-secondary" : "bg-dark") me-2">
-                                    #@rank @(rank == 1 ? "GOLD" : rank == 2 ? "SILVER" : "BRONZE")
+                                <span style="background: @medalColor; color: @(rank == 1 ? "#1a1a2e" : "#f0f0f0"); padding: 6px 12px; border-radius: 6px; font-weight: 700; margin-right: 12px; display: inline-block;">
+                                    #@rank @(rank == 1 ? "🥇 GOLD" : rank == 2 ? "🥈 SILVER" : "🥉 BRONZE")
                                 </span>
-                                <strong>@r.TheaterName</strong> — @r.HallName
-                                <span class="text-muted ms-2"><i class="bi bi-geo-alt"></i> @r.City</span>
+                                <div style="display: inline-block;">
+                                    <div style="color: #ffd700; font-weight: 700; font-size: 16px;">@r.TheaterName</div>
+                                    <div style="color: #b0b0b0; font-size: 14px;">@r.HallName <i class="bi bi-geo-alt"></i> @r.City</div>
+                                </div>
                             </div>
-                            <div>
-                                <span class="badge bg-primary fs-6">@r.OccupancyPercentage%</span>
+                            <div class="text-end">
+                                <div style="color: @occupancyColor; font-weight: 700; font-size: 24px;">@r.OccupancyPercentage%</div>
+                                <small style="color: #b0b0b0;">Occupancy</small>
                             </div>
                         </div>
-                        <div class="progress" style="height: 25px;">
-                            <div class="progress-bar @(r.OccupancyPercentage >= 80 ? "bg-success" : r.OccupancyPercentage >= 50 ? "bg-info" : "bg-warning")"
+
+                        <!-- Progress Bar -->
+                        <div class="progress" style="height: 28px; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                            <div class="progress-bar" 
+                                 style="width: @r.OccupancyPercentage%; background: linear-gradient(90deg, @occupancyColor 0%, @(r.OccupancyPercentage >= 80 ? "#059669" : r.OccupancyPercentage >= 50 ? "#2563eb" : "#f97316") 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;"
                                  role="progressbar"
-                                 style="width: @r.OccupancyPercentage%"
                                  aria-valuenow="@r.OccupancyPercentage"
                                  aria-valuemin="0"
                                  aria-valuemax="100">
                                 @r.PaidTickets / @r.Capacity seats
                             </div>
                         </div>
-                        <div class="text-muted small mt-1">
-                            Capacity: @r.Capacity seats | Paid Tickets: @r.PaidTickets | Occupancy: @r.OccupancyPercentage%
+
+                        <!-- Stats Row -->
+                        <div class="row mt-3 text-center">
+                            <div class="col-4">
+                                <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Total Capacity</div>
+                                <div style="color: #ffd700; font-weight: 700; font-size: 16px; margin-top: 4px;">@r.Capacity seats</div>
+                            </div>
+                            <div class="col-4">
+                                <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Paid Tickets</div>
+                                <div style="color: #10b981; font-weight: 700; font-size: 16px; margin-top: 4px;">@r.PaidTickets</div>
+                            </div>
+                            <div class="col-4">
+                                <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Available Seats</div>
+                                <div style="color: #3b82f6; font-weight: 700; font-size: 16px; margin-top: 4px;">@(r.Capacity - r.PaidTickets)</div>
+                            </div>
                         </div>
                     </div>
                     rank++;

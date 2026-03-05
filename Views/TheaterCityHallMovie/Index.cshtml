@@ -1,20 +1,25 @@
 @model TheaterCityHallMovieViewModel
 @{
-    ViewData["Title"] = "Hall Schedule";
+    ViewData["Title"] = "Theater City Hall Movie Schedule Report";
 }
 
-<div class="page-header">
-    <h2><i class="bi bi-collection-play me-2"></i>Hall Movie Schedule</h2>
-    <p>View movies and showtimes scheduled for any screening hall</p>
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+        <i class="bi bi-collection-play me-3"></i>Theater City Hall Movie Schedule
+    </h1>
+    <p style="color: #b0b0b0;">View comprehensive movie schedules and showtimes for each screening hall</p>
 </div>
 
-<!-- Hall Selection -->
-<div class="filter-section mb-4">
+<!-- Hall Selection Filter -->
+<div class="filter-card mb-5" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px; padding: 24px;">
     <form method="get" class="row align-items-end g-3">
-        <div class="col-md-6">
-            <label class="form-label fw-bold"><i class="bi bi-door-open me-1"></i>Select Hall</label>
-            <select name="hallId" class="form-select" onchange="this.form.submit()">
-                <option value="">-- Select a Hall to view Movies & Showtimes --</option>
+        <div class="col-md-7">
+            <label class="form-label" style="color: #ffd700; font-weight: 600;">
+                <i class="bi bi-door-open me-2"></i>Select Theater & Hall
+            </label>
+            <select name="hallId" class="form-select form-select-cinema" onchange="this.form.submit()">
+                <option value="">-- Choose a Hall --</option>
                 @foreach (var h in Model.AllHalls)
                 {
                     <option value="@h.HallID" selected="@(Model.SelectedHallId == h.HallID ? "selected" : null)">
@@ -22,12 +27,15 @@
                     </option>
                 }
             </select>
+            <small style="color: #b0b0b0;">Select a screening hall to view all movies and showtimes</small>
         </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-kumari w-100"><i class="bi bi-search me-2"></i>Load Movies</button>
-        </div>
-        <div class="col-md-3">
-            <a asp-action="Index" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle me-2"></i>Clear</a>
+        <div class="col-md-5 d-flex gap-2">
+            <button type="submit" class="btn btn-kumari flex-grow-1" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+                <i class="bi bi-search me-2"></i>Load Schedule
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary" style="border-color: #666; color: #b0b0b0; padding: 10px 20px;">
+                <i class="bi bi-x-circle me-2"></i>Clear
+            </a>
         </div>
     </form>
 </div>
@@ -35,22 +43,47 @@
 @if (Model.SelectedHallId.HasValue && Model.TheaterCityHallInfo != null)
 {
     <!-- Theater/Hall Info -->
-    <div class="card mb-4" style="border-left: 4px solid #e50914;">
-        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-building me-2"></i>Theater & Hall Information</h5></div>
+    <div class="card mb-5" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-left: 4px solid #e50914; border-radius: 12px;">
+        <div class="card-header" style="background: transparent; border-bottom: 1px solid #333;">
+            <h4 class="mb-0" style="color: #ffd700;">
+                <i class="bi bi-building me-2"></i>Screening Hall Information
+            </h4>
+        </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3"><strong>Theater:</strong> @Model.TheaterCityHallInfo.TheaterName</div>
-                <div class="col-md-2"><strong>City:</strong> <i class="bi bi-geo-alt"></i> @Model.TheaterCityHallInfo.City</div>
-                <div class="col-md-3"><strong>Address:</strong> @Model.TheaterCityHallInfo.Address</div>
-                <div class="col-md-2"><strong>Hall:</strong> @Model.TheaterCityHallInfo.HallName</div>
-                <div class="col-md-2"><strong>Capacity:</strong> <span class="badge bg-info">@Model.TheaterCityHallInfo.Capacity seats</span></div>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Theater Name</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 16px; margin-top: 4px;">@Model.TheaterCityHallInfo.TheaterName</div>
+                </div>
+                <div class="col-md-2">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">City</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 16px; margin-top: 4px;">
+                        <i class="bi bi-geo-alt"></i> @Model.TheaterCityHallInfo.City
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Address</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 16px; margin-top: 4px;">@Model.TheaterCityHallInfo.Address</div>
+                </div>
+                <div class="col-md-2">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Hall Name</div>
+                    <div style="color: #ffd700; font-weight: 600; font-size: 16px; margin-top: 4px;">@Model.TheaterCityHallInfo.HallName</div>
+                </div>
+                <div class="col-md-2">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Capacity</div>
+                    <span style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; font-size: 12px; padding: 4px 8px; border-radius: 6px; font-weight: 600;">@Model.TheaterCityHallInfo.Capacity seats</span>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Movies + Showtimes -->
-    <div class="card">
-        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-film me-2"></i>Movies & Showtimes</h5></div>
+    <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+        <div class="card-header" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+            <h4 class="mb-0 text-white">
+                <i class="bi bi-film me-2"></i>Movies & Showtimes Schedule
+            </h4>
+        </div>
         <div class="card-body p-0">
             @if (Model.MovieShows.Any())
             {
@@ -99,6 +132,14 @@
                 </div>
             }
         </div>
-        <div class="card-footer bg-white text-muted small">Total Shows: <strong>@Model.MovieShows.Count</strong></div>
+        <div class="card-footer" style="background: transparent; border-top: 1px solid #333; padding: 16px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #b0b0b0;">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Total Shows: <strong style="color: #ffd700;">@Model.MovieShows.Count</strong>
+                </span>
+                <small style="color: #999;">Report updated at @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</small>
+            </div>
+        </div>
     </div>
 }

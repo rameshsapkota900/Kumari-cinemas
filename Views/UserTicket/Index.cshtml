@@ -1,20 +1,25 @@
 @model UserTicketViewModel
 @{
-    ViewData["Title"] = "User Ticket History";
+    ViewData["Title"] = "User Ticket History Report";
 }
 
-<div class="page-header">
-    <h2><i class="bi bi-person-badge me-2"></i>User Ticket History</h2>
-    <p>View ticket purchase history for any registered user (last 6 months)</p>
+<!-- Page Header -->
+<div class="page-header mb-5">
+    <h1 class="display-5" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+        <i class="bi bi-person-badge me-3"></i>User Ticket History Report
+    </h1>
+    <p style="color: #b0b0b0;">View ticket purchase history for any registered user (last 6 months, paid tickets only)</p>
 </div>
 
-<!-- User Selection -->
-<div class="filter-section mb-4">
+<!-- User Selection Filter -->
+<div class="filter-card mb-5" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px; padding: 24px;">
     <form method="get" class="row align-items-end g-3">
-        <div class="col-md-6">
-            <label class="form-label fw-bold"><i class="bi bi-person me-1"></i>Select User</label>
-            <select name="userId" class="form-select" onchange="this.form.submit()">
-                <option value="">-- Select a User to view their Tickets --</option>
+        <div class="col-md-7">
+            <label class="form-label" style="color: #ffd700; font-weight: 600;">
+                <i class="bi bi-person me-2"></i>Select User
+            </label>
+            <select name="userId" class="form-select form-select-cinema" onchange="this.form.submit()">
+                <option value="">-- Choose a User --</option>
                 @foreach (var u in Model.AllUsers)
                 {
                     <option value="@u.UserID" selected="@(Model.SelectedUserId == u.UserID ? "selected" : null)">
@@ -22,12 +27,15 @@
                     </option>
                 }
             </select>
+            <small style="color: #b0b0b0;">Select a customer to view their booking history</small>
         </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-kumari w-100"><i class="bi bi-search me-2"></i>Load Tickets</button>
-        </div>
-        <div class="col-md-3">
-            <a asp-action="Index" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle me-2"></i>Clear</a>
+        <div class="col-md-5 d-flex gap-2">
+            <button type="submit" class="btn btn-kumari flex-grow-1" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+                <i class="bi bi-search me-2"></i>Load Tickets
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary" style="border-color: #666; color: #b0b0b0; padding: 10px 20px;">
+                <i class="bi bi-x-circle me-2"></i>Clear
+            </a>
         </div>
     </form>
 </div>
@@ -35,22 +43,40 @@
 @if (Model.SelectedUserId.HasValue && Model.SelectedUser != null)
 {
     <!-- User Details Card -->
-    <div class="card mb-4" style="border-left: 4px solid #e50914;">
-        <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>User Details</h5></div>
+    <div class="card mb-5" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-left: 4px solid #e50914; border-radius: 12px;">
+        <div class="card-header" style="background: transparent; border-bottom: 1px solid #333;">
+            <h4 class="mb-0" style="color: #ffd700;">
+                <i class="bi bi-person-circle me-2"></i>Customer Details
+            </h4>
+        </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3"><strong>Username:</strong> @Model.SelectedUser.Username</div>
-                <div class="col-md-3"><strong>Full Name:</strong> @Model.SelectedUser.FullName</div>
-                <div class="col-md-3"><strong>Email:</strong> @Model.SelectedUser.Email</div>
-                <div class="col-md-3"><strong>Phone:</strong> @Model.SelectedUser.Phone</div>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Username</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 16px; margin-top: 4px;">@Model.SelectedUser.Username</div>
+                </div>
+                <div class="col-md-3">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Full Name</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 16px; margin-top: 4px;">@Model.SelectedUser.FullName</div>
+                </div>
+                <div class="col-md-3">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Email</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 16px; margin-top: 4px;">@Model.SelectedUser.Email</div>
+                </div>
+                <div class="col-md-3">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Phone</div>
+                    <div style="color: #f0f0f0; font-weight: 600; font-size: 16px; margin-top: 4px;">@Model.SelectedUser.Phone</div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Tickets Table -->
-    <div class="card">
-        <div class="card-header bg-white">
-            <h5 class="mb-0"><i class="bi bi-ticket-perforated me-2"></i>Tickets Purchased (Last 6 Months)</h5>
+    <div class="card" style="background: linear-gradient(135deg, #1e2936 0%, #252d3d 100%); border: 2px solid #333333; border-radius: 12px;">
+        <div class="card-header" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%); border: none;">
+            <h4 class="mb-0 text-white">
+                <i class="bi bi-ticket-perforated me-2"></i>Tickets Purchased (Last 6 Months - Paid Only)
+            </h4>
         </div>
         <div class="card-body p-0">
             @if (Model.Tickets.Any())
@@ -87,9 +113,13 @@
                             }
                         </tbody>
                         <tfoot>
-                            <tr class="fw-bold">
-                                <td colspan="3" class="text-end">Total (@Model.Tickets.Count tickets):</td>
-                                <td>Rs. @Model.Tickets.Sum(t => t.Price).ToString("F2")</td>
+                            <tr style="background: rgba(255, 215, 0, 0.1); border-top: 2px solid #ffd700;">
+                                <td colspan="3" class="text-end" style="color: #ffd700; font-weight: 700; padding: 16px;">
+                                    <i class="bi bi-calculator me-2"></i>Total (@Model.Tickets.Count paid tickets):
+                                </td>
+                                <td style="color: #ffd700; font-weight: 700; font-size: 18px; padding: 16px;">
+                                    Rs. @Model.Tickets.Sum(t => t.Price).ToString("F2")
+                                </td>
                                 <td colspan="5"></td>
                             </tr>
                         </tfoot>
@@ -104,5 +134,12 @@
                 </div>
             }
         </div>
+    </div>
+
+    <div class="card-footer" style="background: transparent; border-top: 1px solid #333; padding: 16px 20px;">
+        <small style="color: #b0b0b0;">
+            <i class="bi bi-info-circle me-1"></i>
+            Report shows all tickets for the selected customer purchased in the last 6 months with confirmed/paid payment status.
+        </small>
     </div>
 }
