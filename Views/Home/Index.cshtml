@@ -6,11 +6,11 @@
 <!-- Page Header -->
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
-        <h2><i class="bi bi-speedometer2 me-2"></i>KumariCinemas Dashboard</h2>
-        <p>Welcome to the KumariCinemas Management System — Real-time overview of cinema operations</p>
+        <h2><i class="bi bi-speedometer2 me-2" style="color: #e50914;"></i>KumariCinemas Dashboard</h2>
+        <p style="color: #718096;">Welcome to the KumariCinemas Management System — Professional cinema operations & analytics</p>
     </div>
     <div>
-        <span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1 small"></i>Live</span>
+        <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Live System</span>
     </div>
 </div>
 
@@ -151,40 +151,65 @@
 <!-- Quick Navigation -->
 <div class="row g-4">
     <div class="col-12">
-        <div class="card">
+        <div class="card" style="border: 2px solid #e2e8f0;">
             <div class="card-header bg-white border-0">
-                <h5 class="mb-0"><i class="bi bi-grid me-2"></i>Quick Navigation — Options Menu</h5>
+                <h5 class="mb-0"><i class="bi bi-lightning-fill me-2" style="color: #e50914;"></i>Quick Access Menu</h5>
+                <small class="text-muted">Jump to any section of the cinema management system</small>
             </div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-lg-2 col-md-4 col-6">
-                        <a asp-controller="Users" asp-action="Index" class="btn btn-outline-primary w-100 py-3">
-                            <i class="bi bi-people d-block fs-3 mb-1"></i>Users
+                        <a asp-controller="Users" asp-action="Index" class="nav-card" style="text-decoration: none;">
+                            <div class="nav-card-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div class="nav-card-label">Users</div>
+                            <div class="nav-card-desc text-muted small">Manage customers</div>
                         </a>
                     </div>
                     <div class="col-lg-2 col-md-4 col-6">
-                        <a asp-controller="TheaterCityHall" asp-action="Index" class="btn btn-outline-info w-100 py-3">
-                            <i class="bi bi-building d-block fs-3 mb-1"></i>Theaters & Halls
+                        <a asp-controller="TheaterCityHall" asp-action="Index" class="nav-card" style="text-decoration: none;">
+                            <div class="nav-card-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="nav-card-label">Theaters & Halls</div>
+                            <div class="nav-card-desc text-muted small">Cinema locations</div>
                         </a>
                     </div>
                     <div class="col-lg-2 col-md-4 col-6">
-                        <a asp-controller="Movies" asp-action="Index" class="btn btn-outline-danger w-100 py-3">
-                            <i class="bi bi-camera-reels d-block fs-3 mb-1"></i>Movies
+                        <a asp-controller="Movies" asp-action="Index" class="nav-card" style="text-decoration: none;">
+                            <div class="nav-card-icon" style="background: linear-gradient(135deg, #e50914 0%, #b20710 100%);">
+                                <i class="bi bi-camera-reels"></i>
+                            </div>
+                            <div class="nav-card-label">Movies</div>
+                            <div class="nav-card-desc text-muted small">Film catalogue</div>
                         </a>
                     </div>
                     <div class="col-lg-2 col-md-4 col-6">
-                        <a asp-controller="Showtimes" asp-action="Index" class="btn btn-outline-warning w-100 py-3">
-                            <i class="bi bi-clock d-block fs-3 mb-1"></i>Showtimes
+                        <a asp-controller="Showtimes" asp-action="Index" class="nav-card" style="text-decoration: none;">
+                            <div class="nav-card-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div class="nav-card-label">Showtimes</div>
+                            <div class="nav-card-desc text-muted small">Schedule & timings</div>
                         </a>
                     </div>
                     <div class="col-lg-2 col-md-4 col-6">
-                        <a asp-controller="Tickets" asp-action="Index" class="btn btn-outline-success w-100 py-3">
-                            <i class="bi bi-ticket-perforated d-block fs-3 mb-1"></i>Tickets
+                        <a asp-controller="Tickets" asp-action="Index" class="nav-card" style="text-decoration: none;">
+                            <div class="nav-card-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+                                <i class="bi bi-ticket-perforated"></i>
+                            </div>
+                            <div class="nav-card-label">Tickets</div>
+                            <div class="nav-card-desc text-muted small">Sales & bookings</div>
                         </a>
                     </div>
                     <div class="col-lg-2 col-md-4 col-6">
-                        <a asp-controller="UserTicket" asp-action="Index" class="btn btn-outline-secondary w-100 py-3">
-                            <i class="bi bi-person-badge d-block fs-3 mb-1"></i>User Ticket
+                        <a asp-controller="UserTicket" asp-action="Index" class="nav-card" style="text-decoration: none;">
+                            <div class="nav-card-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div class="nav-card-label">Reports</div>
+                            <div class="nav-card-desc text-muted small">Analytics & data</div>
                         </a>
                     </div>
                 </div>
